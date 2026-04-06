@@ -87,7 +87,8 @@ def _render_header(report: SignalReport) -> str:
     lines = [
         _THICK,
         f"  투자 시그널 리포트  │  {since_str} ~ {until_str}",
-        f"  기사 {report.analyzed_count}건 분석  │  시그널 {len(report.signals)}건  │  {direction_parts}",
+        f"  기사 {report.analyzed_count}건 분석  │  시그널 {len(report.signals)}건"
+        f"  │  {direction_parts}",
         _THICK,
     ]
     return "\n".join(lines)

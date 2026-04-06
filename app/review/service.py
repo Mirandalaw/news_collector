@@ -55,7 +55,8 @@ class ReviewService:
 
         issues = detect_issues(articles)
         logger.info(
-            "이슈 감지 완료 | 총 %d건 | no_summary=%d / duplicate=%d / untagged=%d / misclassify=%d",
+            "이슈 감지 완료 | 총 %d건 "
+            "| no_summary=%d / duplicate=%d / untagged=%d / misclassify=%d",
             len(issues),
             sum(1 for i in issues if i.kind.value == "no_summary"),
             sum(1 for i in issues if i.kind.value == "duplicate_hash"),

@@ -247,7 +247,7 @@ def fetch_symbol_news(
 
 
 def _row_to_article(row: tuple, symbols: list[str]) -> BriefingArticle:
-    """(id, title, url, source_name, summary, article_type, published_at, collected_at) 행을 변환."""
+    """(id, title, url, source_name, summary, article_type, published_at, collected_at) 행 변환."""
     return BriefingArticle(
         id=row[0],
         title=row[1],
@@ -262,7 +262,7 @@ def _row_to_article(row: tuple, symbols: list[str]) -> BriefingArticle:
 
 
 def _row_to_symbol_article(row: tuple) -> BriefingArticle:
-    """(id, title, url, source_name, summary, article_type, published_at, collected_at, symbols) 행을 변환."""
+    """DB 행(id~symbols 9열)을 BriefingArticle로 변환."""
     return BriefingArticle(
         id=row[0],
         title=row[1],

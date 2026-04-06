@@ -174,7 +174,6 @@ def _render_issue_detail(result: ReviewResult) -> str:
 
 
 def _render_footer(result: ReviewResult) -> str:
-    issue_count = len(result.issues)
     issue_art_count = len(result.issue_article_ids)
     generated = _now_kst_str()
     return (
