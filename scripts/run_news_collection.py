@@ -17,14 +17,15 @@ import os
 import sys
 from pathlib import Path
 
+# 모든 import를 최상단으로 이동 (E402 해결)
+from app.collectors.rss_collector import RssSource
+from app.db.connection import DatabaseConfig
+from app.services.news_ingestion_service import NewsIngestionService
+
 # 프로젝트 루트를 sys.path에 추가 (패키지 설치 없이 직접 실행 시)
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
-
-from app.collectors.rss_collector import RssSource
-from app.db.connection import DatabaseConfig
-from app.services.news_ingestion_service import NewsIngestionService
 
 
 def _setup_logging() -> None:
