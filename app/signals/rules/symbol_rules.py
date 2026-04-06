@@ -33,8 +33,10 @@ EARNINGS_BEAT = KeywordSignalRule(
     direction=Direction.BULLISH,
     horizon=Horizon.SHORT,
     importance=Importance.HIGH,
-    reason="실적 서프라이즈 → 즉각적인 주가 리레이팅 기대. 다음 분기 가이던스도 함께 확인 필요.",
-    action_hint="실적 발표 후 갭업 시 추격 매수보다 눌림목 대기 전략 검토. 가이던스 하향 리스크 주의.",
+    reason=("실적 서프라이즈 → 즉각적인 주가 리레이팅 기대. 다음 분기 가이던스도 함께 확인 필요."),
+    action_hint=(
+        "실적 발표 후 갭업 시 추격 매수보다 눌림목 대기 전략 검토. 가이던스 하향 리스크 주의."
+    ),
     target_types=("company", "event"),
 )
 
