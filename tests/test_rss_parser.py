@@ -11,7 +11,6 @@ import pytest
 from app.parsers.rss_parser import _normalize_whitespace, _strip_html, parse_entry
 from tests.conftest import make_feed_entry
 
-
 # ---------------------------------------------------------------------------
 # parse_entry - 정상 케이스
 # ---------------------------------------------------------------------------

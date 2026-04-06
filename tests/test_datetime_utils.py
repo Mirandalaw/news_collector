@@ -6,8 +6,6 @@
 import time
 from datetime import datetime, timezone
 
-import pytest
-
 from app.utils.datetime_utils import now_utc, parse_struct_time_to_utc
 
 

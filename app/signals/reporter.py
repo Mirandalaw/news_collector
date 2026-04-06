@@ -20,13 +20,11 @@ from app.signals.models import (
     DIRECTION_LABEL,
     HORIZON_LABEL,
     IMPORTANCE_LABEL,
-    Direction,
     Horizon,
     Importance,
     Signal,
     SignalReport,
 )
-from app.utils.datetime_utils import now_utc
 
 _W = 66
 _THICK = "═" * _W

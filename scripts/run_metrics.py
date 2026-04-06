@@ -12,7 +12,6 @@
 """
 
 import argparse
-import os
 import sys
 from datetime import timedelta, timezone
 from pathlib import Path
@@ -73,7 +72,7 @@ def _print_stats(rows: list[JobStatRow], days: int) -> None:
         print(f"  (최근 {days}일 이력 없음)")
         return
 
-    print(f"─" * _W)
+    print("─" * _W)
     print(f"  job별 통계  │  최근 {days}일")
     print("─" * _W)
     header = f"  {'job_name':<14}  {'총실행':>6}  {'성공':>5}  {'성공률':>7}  {'평균(s)':>8}  마지막 실행"

@@ -6,9 +6,9 @@
 
 import logging
 import os
+from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Generator
 
 import psycopg2
 import psycopg2.extensions

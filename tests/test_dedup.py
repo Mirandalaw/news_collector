@@ -3,11 +3,8 @@
 DuplicateFilter 구현체의 계약과 hashing 유틸의 불변 조건을 검증한다.
 """
 
-import pytest
-
 from app.services.dedup import NullDuplicateFilter, TitleHashFilter
 from app.utils.hashing import compute_title_hash, normalize_title
-
 
 # ---------------------------------------------------------------------------
 # hashing 유틸

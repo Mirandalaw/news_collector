@@ -24,7 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.db.connection import DatabaseConfig
-from app.jobs.base import JobResult, setup_job_logging
+from app.jobs.base import setup_job_logging
 from app.jobs.briefing_job import BriefingJobConfig, build_publishers, run_briefing
 from app.jobs.collect_job import run_collect
 from app.summarizers.mock_summarizer import MockSummarizer

@@ -5,7 +5,6 @@
 - db_conn: 실제 DB 연결 (통합 테스트 전용, @pytest.mark.integration 으로 분리)
 """
 
-import os
 from datetime import datetime, timezone
 from types import SimpleNamespace
 
@@ -13,7 +12,6 @@ import pytest
 
 from app.db.repositories.news_repository import NewsArticle
 from app.utils.hashing import compute_title_hash
-
 
 # ---------------------------------------------------------------------------
 # 공통 픽스처

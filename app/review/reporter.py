@@ -246,6 +246,7 @@ def _fmt_time(dt: datetime) -> str:
 
 def _now_kst_str() -> str:
     from datetime import timedelta
+
     from app.utils.datetime_utils import now_utc
 
     kst = now_utc().astimezone(timezone(timedelta(hours=9)))

@@ -11,12 +11,12 @@ from dataclasses import dataclass, field
 
 import psycopg2
 
-from app.collectors.rss_collector import CollectionResult, RssSource, collect_from_source
+from app.classifiers.article_classifier import ArticleClassifier
+from app.collectors.rss_collector import RssSource, collect_from_source
 from app.db.connection import DatabaseConfig, managed_connection
 from app.db.repositories.news_repository import NewsArticle, insert_articles
 from app.db.repositories.symbol_repository import fetch_article_ids_by_urls, insert_article_symbols
 from app.db.schema import create_tables
-from app.classifiers.article_classifier import ArticleClassifier
 from app.services.dedup import DuplicateFilter, NullDuplicateFilter
 from app.taggers.keyword_tagger import SymbolTagger
 
