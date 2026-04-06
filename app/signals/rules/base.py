@@ -15,7 +15,6 @@ from typing import Protocol, runtime_checkable
 from app.db.repositories.briefing_repository import BriefingArticle
 from app.signals.models import Direction, Horizon, Importance, Signal
 
-
 # ---------------------------------------------------------------------------
 # Protocol
 # ---------------------------------------------------------------------------

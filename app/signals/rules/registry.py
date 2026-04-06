@@ -11,8 +11,8 @@ DEFAULT_RULES : 엔진이 기본으로 사용하는 규칙 전체 목록.
   - 또는 DEFAULT_RULES에서 제거
 """
 
-from app.signals.rules.base import SignalRule
 from app.signals.rules import market_rules, symbol_rules
+from app.signals.rules.base import SignalRule
 
 DEFAULT_RULES: list[SignalRule] = [
     # ── 거시경제 / 시장 전체 ──────────────────────────────────────
