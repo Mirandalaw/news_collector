@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 # 결과 모델
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class DispatchResult:
     """dispatch() 전체 결과.
@@ -50,7 +51,7 @@ class DispatchResult:
     def log_summary(self) -> None:
         """채널별 결과를 로그로 요약한다."""
         total = len(self.publish_results)
-        ok    = sum(1 for r in self.publish_results if r.success)
+        ok = sum(1 for r in self.publish_results if r.success)
         logger.info("전송 결과 | %d/%d 채널 성공", ok, total)
         for result in self.publish_results:
             level = logging.INFO if result.success else logging.WARNING
@@ -60,6 +61,7 @@ class DispatchResult:
 # ---------------------------------------------------------------------------
 # 디스패처
 # ---------------------------------------------------------------------------
+
 
 class BriefingDispatcher:
     """브리핑 생성 + 다중 채널 전달 파이프라인.
@@ -76,7 +78,7 @@ class BriefingDispatcher:
     ) -> None:
         if not publishers:
             raise ValueError("publishers는 최소 1개 이상이어야 합니다.")
-        self._service    = service
+        self._service = service
         self._publishers = publishers
 
     def dispatch(self, query: BriefingQuery) -> DispatchResult:
@@ -92,8 +94,8 @@ class BriefingDispatcher:
             psycopg2.OperationalError: 브리핑 생성 중 DB 오류 발생 시
         """
         briefing = self._service.generate(query)
-        results  = self._publish_all(briefing)
-        report   = DispatchResult(briefing=briefing, publish_results=results)
+        results = self._publish_all(briefing)
+        report = DispatchResult(briefing=briefing, publish_results=results)
         report.log_summary()
         return report
 
@@ -108,16 +110,12 @@ class BriefingDispatcher:
             results.append(result)
         return results
 
-    def _safe_publish(
-        self, publisher: Publisher, briefing: MorningBriefing
-    ) -> PublishResult:
+    def _safe_publish(self, publisher: Publisher, briefing: MorningBriefing) -> PublishResult:
         """Publisher.publish()를 호출하고, 미처리 예외를 잡아 실패 결과로 변환한다."""
         try:
             return publisher.publish(briefing)
         except Exception as e:
-            logger.exception(
-                "Publisher 미처리 예외 | publisher=%s", publisher.publisher_name
-            )
+            logger.exception("Publisher 미처리 예외 | publisher=%s", publisher.publisher_name)
             return PublishResult(
                 publisher=publisher.publisher_name,
                 success=False,

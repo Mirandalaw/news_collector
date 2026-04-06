@@ -30,13 +30,14 @@ from app.utils.datetime_utils import now_utc
 
 _W = 66
 _THICK = "═" * _W
-_THIN  = "─" * _W
-_KST   = timezone(timedelta(hours=9))
+_THIN = "─" * _W
+_KST = timezone(timedelta(hours=9))
 
 
 # ---------------------------------------------------------------------------
 # 공개 API
 # ---------------------------------------------------------------------------
+
 
 def render_text(report: SignalReport) -> str:
     """SignalReport를 사람이 읽기 쉬운 텍스트로 렌더링한다."""
@@ -59,14 +60,12 @@ def render_text(report: SignalReport) -> str:
 def render_json(report: SignalReport) -> str:
     """SignalReport를 JSON 문자열로 변환한다."""
     data = {
-        "analyzed_at":    _kst(report.analyzed_at),
+        "analyzed_at": _kst(report.analyzed_at),
         "briefing_since": report.briefing_since.isoformat(),
         "briefing_until": report.briefing_until.isoformat(),
         "analyzed_count": report.analyzed_count,
-        "total_signals":  len(report.signals),
-        "direction_summary": {
-            d.value: c for d, c in report.direction_summary.items()
-        },
+        "total_signals": len(report.signals),
+        "direction_summary": {d.value: c for d, c in report.direction_summary.items()},
         "signals": [s.to_dict() for s in report.signals],
     }
     return json.dumps(data, ensure_ascii=False, indent=2, default=str)
@@ -75,6 +74,7 @@ def render_json(report: SignalReport) -> str:
 # ---------------------------------------------------------------------------
 # 텍스트 렌더러 내부
 # ---------------------------------------------------------------------------
+
 
 def _render_header(report: SignalReport) -> str:
     since_str = _fmt_dt(report.briefing_since)
@@ -130,8 +130,13 @@ def _render_symbol_section(report: SignalReport) -> str:
         lines.append(f"\n  ▸ {symbol}  ({len(sym_signals)}건)")
         for s in sym_signals:
             icon = DIRECTION_ICON[s.direction]
-            imp  = "★" * (3 if s.importance == Importance.HIGH
-                          else 2 if s.importance == Importance.MEDIUM else 1)
+            imp = "★" * (
+                3
+                if s.importance == Importance.HIGH
+                else 2
+                if s.importance == Importance.MEDIUM
+                else 1
+            )
             lines.append(f"    {icon} [{imp}] [{HORIZON_LABEL[s.horizon]}] {s.rule_name}")
             lines.append(f"      근거: {s.reason[:70]}")
             if len(s.reason) > 70:
@@ -143,7 +148,7 @@ def _render_symbol_section(report: SignalReport) -> str:
 
 
 def _render_signal_card(s: Signal, compact: bool = False) -> str:
-    icon  = DIRECTION_ICON[s.direction]
+    icon = DIRECTION_ICON[s.direction]
     dir_l = DIRECTION_LABEL[s.direction]
     hor_l = HORIZON_LABEL[s.horizon]
     imp_l = IMPORTANCE_LABEL[s.importance]
@@ -181,6 +186,7 @@ _DISCLAIMER = f"""
 # ---------------------------------------------------------------------------
 # 공통 유틸
 # ---------------------------------------------------------------------------
+
 
 def _kst(dt: datetime) -> str:
     return dt.astimezone(_KST).strftime("%Y-%m-%d %H:%M KST")

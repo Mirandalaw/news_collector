@@ -13,6 +13,7 @@ from app.utils.hashing import compute_title_hash, normalize_title
 # hashing 유틸
 # ---------------------------------------------------------------------------
 
+
 class TestNormalizeTitle:
     def test_소문자_변환(self):
         assert normalize_title("HELLO WORLD") == "hello world"
@@ -62,6 +63,7 @@ class TestComputeTitleHash:
 # NullDuplicateFilter
 # ---------------------------------------------------------------------------
 
+
 class TestNullDuplicateFilter:
     def test_항상_false_반환(self, make_article):
         f = NullDuplicateFilter()
@@ -77,7 +79,9 @@ class TestNullDuplicateFilter:
 
     def test_여러_기사_모두_false(self, make_article):
         f = NullDuplicateFilter()
-        articles = [make_article(title=f"타이틀{i}", url=f"https://example.com/{i}") for i in range(5)]
+        articles = [
+            make_article(title=f"타이틀{i}", url=f"https://example.com/{i}") for i in range(5)
+        ]
         for a in articles:
             assert f.is_duplicate(a) is False
 
@@ -85,6 +89,7 @@ class TestNullDuplicateFilter:
 # ---------------------------------------------------------------------------
 # TitleHashFilter
 # ---------------------------------------------------------------------------
+
 
 class TestTitleHashFilter:
     def test_처음_기사는_중복_아님(self, make_article):
@@ -141,8 +146,7 @@ class TestTitleHashFilter:
         """같은 타이틀 여러 건 중 첫 번째만 mark_seen 되어야 한다."""
         f = TitleHashFilter()
         articles = [
-            make_article(title="동일 타이틀", url=f"https://example.com/{i}")
-            for i in range(3)
+            make_article(title="동일 타이틀", url=f"https://example.com/{i}") for i in range(3)
         ]
         passed = []
         for a in articles:

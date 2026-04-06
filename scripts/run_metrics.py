@@ -27,16 +27,16 @@ from app.db.repositories.metrics_repository import (
     fetch_recent_runs,
 )
 
-_W   = 80
+_W = 80
 _KST = timezone(timedelta(hours=9))
 
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="job 실행 메트릭 조회")
-    parser.add_argument("--job",   default=None, help="특정 job 이름 필터 (예: collect)")
+    parser.add_argument("--job", default=None, help="특정 job 이름 필터 (예: collect)")
     parser.add_argument("--limit", type=int, default=30, help="조회 건수 (기본: 30)")
     parser.add_argument("--stats", action="store_true", help="job별 통계 요약 출력")
-    parser.add_argument("--days",  type=int, default=7,  help="--stats 집계 기간(일, 기본: 7)")
+    parser.add_argument("--days", type=int, default=7, help="--stats 집계 기간(일, 기본: 7)")
     return parser.parse_args()
 
 
@@ -56,13 +56,15 @@ def _print_recent_runs(rows: list[JobMetricRow]) -> None:
     print(header)
     print("─" * _W)
     for i, r in enumerate(rows, 1):
-        status  = "OK" if r.success else "FAIL"
+        status = "OK" if r.success else "FAIL"
         elapsed = f"{r.elapsed_secs:.1f}s" if r.elapsed_secs is not None else "-"
-        detail  = r.detail[:40] if r.detail else ""
+        detail = r.detail[:40] if r.detail else ""
         if r.error_msg:
             detail = f"[ERR] {r.error_msg[:35]}"
-        print(f"{i:>4}  {r.job_name:<12}  {_fmt_dt(r.started_at):>11}  "
-              f"{elapsed:>8}  {status:<6}  {detail}")
+        print(
+            f"{i:>4}  {r.job_name:<12}  {_fmt_dt(r.started_at):>11}  "
+            f"{elapsed:>8}  {status:<6}  {detail}"
+        )
     print("─" * _W)
 
 
@@ -78,16 +80,18 @@ def _print_stats(rows: list[JobStatRow], days: int) -> None:
     print(header)
     print("─" * _W)
     for r in rows:
-        rate    = f"{r.success_runs / r.total_runs * 100:.0f}%" if r.total_runs else "-"
-        avg     = f"{r.avg_elapsed_secs:.1f}" if r.avg_elapsed_secs is not None else "-"
-        last    = _fmt_dt(r.last_run_at)
-        print(f"  {r.job_name:<14}  {r.total_runs:>6}  {r.success_runs:>5}  "
-              f"{rate:>7}  {avg:>8}  {last}")
+        rate = f"{r.success_runs / r.total_runs * 100:.0f}%" if r.total_runs else "-"
+        avg = f"{r.avg_elapsed_secs:.1f}" if r.avg_elapsed_secs is not None else "-"
+        last = _fmt_dt(r.last_run_at)
+        print(
+            f"  {r.job_name:<14}  {r.total_runs:>6}  {r.success_runs:>5}  "
+            f"{rate:>7}  {avg:>8}  {last}"
+        )
     print("─" * _W)
 
 
 def main() -> int:
-    args      = _parse_args()
+    args = _parse_args()
     db_config = DatabaseConfig.from_env()
 
     print(f"\n{'═' * _W}")

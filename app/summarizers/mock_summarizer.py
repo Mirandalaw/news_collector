@@ -42,9 +42,9 @@ class MockSummarizer:
     def _build_lines(self, req: SummaryRequest) -> list[str]:
         short_title = req.title[:45].rstrip()
         dispatch = {
-            "market":  self._market_lines,
+            "market": self._market_lines,
             "company": self._company_lines,
-            "event":   self._event_lines,
+            "event": self._event_lines,
         }
         builder = dispatch.get(req.article_type, self._general_lines)
         return builder(req, short_title)

@@ -73,6 +73,7 @@ class JobStatRow:
 # 쓰기
 # ---------------------------------------------------------------------------
 
+
 def record_job_run(
     conn: psycopg2.extensions.connection,
     job_name: str,
@@ -96,15 +97,18 @@ def record_job_run(
         error_msg: 오류 메시지 (성공 시 빈 문자열)
     """
     with conn.cursor() as cur:
-        cur.execute(_INSERT_JOB_METRIC, {
-            "job_name":     job_name,
-            "started_at":   started_at,
-            "finished_at":  finished_at,
-            "success":      success,
-            "elapsed_secs": elapsed_secs,
-            "detail":       detail or "",
-            "error_msg":    error_msg or "",
-        })
+        cur.execute(
+            _INSERT_JOB_METRIC,
+            {
+                "job_name": job_name,
+                "started_at": started_at,
+                "finished_at": finished_at,
+                "success": success,
+                "elapsed_secs": elapsed_secs,
+                "detail": detail or "",
+                "error_msg": error_msg or "",
+            },
+        )
     conn.commit()
     logger.debug("job 메트릭 저장 | job=%s | success=%s", job_name, success)
 
@@ -127,8 +131,14 @@ def try_record_job_run(
     try:
         with managed_connection(db_config) as conn:
             record_job_run(
-                conn, job_name, started_at, finished_at,
-                success, elapsed_secs, detail, error_msg,
+                conn,
+                job_name,
+                started_at,
+                finished_at,
+                success,
+                elapsed_secs,
+                detail,
+                error_msg,
             )
     except Exception:
         logger.warning("job 메트릭 저장 실패 (무시됨) | job=%s", job_name, exc_info=True)
@@ -137,6 +147,7 @@ def try_record_job_run(
 # ---------------------------------------------------------------------------
 # 읽기
 # ---------------------------------------------------------------------------
+
 
 def fetch_recent_runs(
     conn: psycopg2.extensions.connection,
@@ -200,6 +211,7 @@ def fetch_job_stats(
 # ---------------------------------------------------------------------------
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
+
 
 def _row_to_metric(row: tuple) -> JobMetricRow:
     return JobMetricRow(

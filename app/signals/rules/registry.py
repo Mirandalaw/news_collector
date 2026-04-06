@@ -29,7 +29,6 @@ DEFAULT_RULES: list[SignalRule] = [
     market_rules.MARKET_RALLY,
     market_rules.MARKET_CRASH,
     market_rules.VIX_SPIKE,
-
     # ── 종목 / 기업 ───────────────────────────────────────────────
     symbol_rules.EARNINGS_BEAT,
     symbol_rules.EARNINGS_MISS,

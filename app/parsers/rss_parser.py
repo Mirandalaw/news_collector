@@ -71,6 +71,7 @@ def parse_entry(
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
 
+
 def _extract_text(entry: FeedEntry, field: str) -> str:
     """entry에서 문자열 필드를 안전하게 추출하고 공백을 정규화한다."""
     raw: str = getattr(entry, field, "") or ""
@@ -84,11 +85,7 @@ def _extract_summary(entry: FeedEntry) -> str:
     summary를 우선하고 없으면 description을 사용한다.
     둘 다 없으면 빈 문자열을 반환한다.
     """
-    raw: str = (
-        getattr(entry, "summary", "")
-        or getattr(entry, "description", "")
-        or ""
-    )
+    raw: str = getattr(entry, "summary", "") or getattr(entry, "description", "") or ""
     cleaned = _strip_html(raw)
     return _normalize_whitespace(cleaned).strip()
 

@@ -46,25 +46,31 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="아침 브리핑 생성 및 전송")
 
     # 전송 채널
-    parser.add_argument("--save",      action="store_true", help="파일로 저장")
-    parser.add_argument("--save-fmt",  default="text", choices=["text", "json"],
-                        help="파일 형식 (기본: text)")
-    parser.add_argument("--save-dir",  default="output", help="저장 디렉토리 (기본: output)")
-    parser.add_argument("--telegram",  action="store_true", help="텔레그램으로 전송")
-    parser.add_argument("--no-console", action="store_true",
-                        help="콘솔 출력 비활성화 (파일/텔레그램 전용 실행 시)")
+    parser.add_argument("--save", action="store_true", help="파일로 저장")
+    parser.add_argument(
+        "--save-fmt", default="text", choices=["text", "json"], help="파일 형식 (기본: text)"
+    )
+    parser.add_argument("--save-dir", default="output", help="저장 디렉토리 (기본: output)")
+    parser.add_argument("--telegram", action="store_true", help="텔레그램으로 전송")
+    parser.add_argument(
+        "--no-console", action="store_true", help="콘솔 출력 비활성화 (파일/텔레그램 전용 실행 시)"
+    )
 
     # 조회 파라미터
-    parser.add_argument("--hours",      type=int, default=12, help="조회 범위 (시간, 기본: 12)")
-    parser.add_argument("--no-symbols", action="store_true",
-                        help="관심 종목 필터 없이 전체 태깅 기사 조회")
+    parser.add_argument("--hours", type=int, default=12, help="조회 범위 (시간, 기본: 12)")
+    parser.add_argument(
+        "--no-symbols", action="store_true", help="관심 종목 필터 없이 전체 태깅 기사 조회"
+    )
 
     # 요약기
     parser.add_argument("--mock", action="store_true", help="MockSummarizer로 AI 요약 시뮬레이션")
 
     # 기타
-    parser.add_argument("--log-level", default=os.environ.get("LOG_LEVEL", "WARNING"),
-                        help="로그 레벨 (기본: WARNING)")
+    parser.add_argument(
+        "--log-level",
+        default=os.environ.get("LOG_LEVEL", "WARNING"),
+        help="로그 레벨 (기본: WARNING)",
+    )
 
     return parser.parse_args()
 
@@ -91,14 +97,14 @@ def main() -> int:
     args = _parse_args()
     _setup_logging(args.log_level)
 
-    db_config  = DatabaseConfig.from_env()
+    db_config = DatabaseConfig.from_env()
     summarizer = MockSummarizer() if args.mock else None
-    symbols    = [] if args.no_symbols else [w.symbol for w in DEFAULT_WATCHLIST]
+    symbols = [] if args.no_symbols else [w.symbol for w in DEFAULT_WATCHLIST]
 
     since, until = morning_briefing_window(hours_back=args.hours)
     query = BriefingQuery(since=since, until=until, symbols=symbols)
 
-    service    = MorningBriefingService(db_config, summarizer=summarizer)
+    service = MorningBriefingService(db_config, summarizer=summarizer)
     publishers = _build_publishers(args)
     dispatcher = BriefingDispatcher(service, publishers)
 

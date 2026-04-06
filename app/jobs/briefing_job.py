@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 # 브리핑 Job 설정
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class BriefingJobConfig:
     """브리핑 Job 실행 파라미터.
@@ -58,6 +59,7 @@ class BriefingJobConfig:
 # ---------------------------------------------------------------------------
 # 편의 팩토리
 # ---------------------------------------------------------------------------
+
 
 def build_publishers(
     console: bool = True,
@@ -90,6 +92,7 @@ def build_publishers(
 # Job 진입점
 # ---------------------------------------------------------------------------
 
+
 def run_briefing(
     db_config: DatabaseConfig,
     job_config: BriefingJobConfig | None = None,
@@ -103,7 +106,7 @@ def run_briefing(
     Returns:
         JobResult — exit_code 속성으로 프로세스 종료 코드 결정
     """
-    cfg     = job_config or BriefingJobConfig()
+    cfg = job_config or BriefingJobConfig()
     started = datetime.now(timezone.utc)
 
     since, until = morning_briefing_window(hours_back=cfg.hours_back)
@@ -118,10 +121,10 @@ def run_briefing(
     )
 
     try:
-        query      = BriefingQuery(since=since, until=until, symbols=symbols)
-        service    = MorningBriefingService(db_config, summarizer=cfg.summarizer)
+        query = BriefingQuery(since=since, until=until, symbols=symbols)
+        service = MorningBriefingService(db_config, summarizer=cfg.summarizer)
         dispatcher = BriefingDispatcher(service, cfg.resolved_publishers())
-        result     = dispatcher.dispatch(query)
+        result = dispatcher.dispatch(query)
     except Exception as e:
         logger.exception("브리핑 파이프라인 오류")
         return JobResult(
@@ -133,11 +136,11 @@ def run_briefing(
             error=e,
         )
 
-    finished  = datetime.now(timezone.utc)
-    success   = result.all_succeeded
-    b         = result.briefing
-    channels  = len(result.publish_results)
-    ok_count  = sum(1 for r in result.publish_results if r.success)
+    finished = datetime.now(timezone.utc)
+    success = result.all_succeeded
+    b = result.briefing
+    channels = len(result.publish_results)
+    ok_count = sum(1 for r in result.publish_results if r.success)
 
     detail = (
         f"market={b.market_section.count} / "

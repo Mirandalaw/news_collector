@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 # feedparser bozo 예외 중 네트워크/파싱 불가로 판단해 소스 전체를 skip할 유형
 _FATAL_BOZO_TYPES: tuple[type[Exception], ...] = (
-    OSError,        # 네트워크 오류
+    OSError,  # 네트워크 오류
     TimeoutError,
 )
 

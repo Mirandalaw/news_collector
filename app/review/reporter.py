@@ -28,6 +28,7 @@ _TYPE_ORDER = ["market", "event", "company", "general"]
 # 공개 API
 # ---------------------------------------------------------------------------
 
+
 def render_text(result: ReviewResult) -> str:
     """ReviewResult를 사람이 읽기 쉬운 텍스트로 렌더링한다."""
     parts: list[str] = []
@@ -49,10 +50,7 @@ def render_json(result: ReviewResult) -> str:
         "stats": result.stats,
         "total_articles": len(result.articles),
         "total_issues": len(result.issues),
-        "issues_by_kind": {
-            kind.value: len(items)
-            for kind, items in result.issues_by_kind.items()
-        },
+        "issues_by_kind": {kind.value: len(items) for kind, items in result.issues_by_kind.items()},
         "articles": [_article_to_dict(a, result) for a in result.articles],
         "issues": [_issue_to_dict(i) for i in result.issues],
     }
@@ -63,15 +61,12 @@ def render_json(result: ReviewResult) -> str:
 # 텍스트 렌더러 내부 구현
 # ---------------------------------------------------------------------------
 
+
 def _render_header(result: ReviewResult) -> str:
     since_str = _fmt_dt(result.since)
     until_str = _fmt_dt(result.until)
     stats = result.stats
-    stat_parts = "  ".join(
-        f"{t}:{stats.get(t, 0)}"
-        for t in _TYPE_ORDER
-        if stats.get(t, 0) > 0
-    )
+    stat_parts = "  ".join(f"{t}:{stats.get(t, 0)}" for t in _TYPE_ORDER if stats.get(t, 0) > 0)
     lines = [
         _THICK,
         f"  검수 리포트  │  {since_str} ~ {until_str}",
@@ -194,6 +189,7 @@ def _render_footer(result: ReviewResult) -> str:
 # JSON 렌더러 내부 구현
 # ---------------------------------------------------------------------------
 
+
 def _article_to_dict(a: ReviewArticle, result: ReviewResult) -> dict:
     issue_map = _build_issue_map(result.issues)
     return {
@@ -207,10 +203,7 @@ def _article_to_dict(a: ReviewArticle, result: ReviewResult) -> dict:
         "summary": a.summary,
         "title_hash": a.title_hash,
         "symbols": a.symbols,
-        "issues": [
-            {"kind": i.kind.value, "detail": i.detail}
-            for i in issue_map.get(a.id, [])
-        ],
+        "issues": [{"kind": i.kind.value, "detail": i.detail} for i in issue_map.get(a.id, [])],
     }
 
 
@@ -226,6 +219,7 @@ def _issue_to_dict(issue: ArticleIssue) -> dict:
 # 공통 유틸
 # ---------------------------------------------------------------------------
 
+
 def _build_issue_map(issues: list[ArticleIssue]) -> dict[int, list[ArticleIssue]]:
     """article_id → 이슈 목록 맵 생성."""
     result: dict[int, list[ArticleIssue]] = {}
@@ -237,6 +231,7 @@ def _build_issue_map(issues: list[ArticleIssue]) -> dict[int, list[ArticleIssue]
 def _fmt_dt(dt: datetime) -> str:
     """UTC datetime을 KST(+9) 날짜·시간 문자열로 포맷."""
     from datetime import timedelta
+
     kst = dt.astimezone(timezone(timedelta(hours=9)))
     return kst.strftime("%Y-%m-%d %H:%M KST")
 
@@ -244,6 +239,7 @@ def _fmt_dt(dt: datetime) -> str:
 def _fmt_time(dt: datetime) -> str:
     """시:분 KST 문자열."""
     from datetime import timedelta
+
     kst = dt.astimezone(timezone(timedelta(hours=9)))
     return kst.strftime("%H:%M")
 
@@ -251,5 +247,6 @@ def _fmt_time(dt: datetime) -> str:
 def _now_kst_str() -> str:
     from datetime import timedelta
     from app.utils.datetime_utils import now_utc
+
     kst = now_utc().astimezone(timezone(timedelta(hours=9)))
     return kst.strftime("%Y-%m-%d %H:%M KST")

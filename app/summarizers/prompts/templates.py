@@ -22,9 +22,9 @@ def build_prompt(request: SummaryRequest) -> str:
         LLM에 전달할 완성된 프롬프트 문자열
     """
     dispatch = {
-        "market":  _market_prompt,
+        "market": _market_prompt,
         "company": _company_prompt,
-        "event":   _event_prompt,
+        "event": _event_prompt,
     }
     builder = dispatch.get(request.article_type, _general_prompt)
     return builder(request)
@@ -33,6 +33,7 @@ def build_prompt(request: SummaryRequest) -> str:
 # ---------------------------------------------------------------------------
 # 섹션별 프롬프트 빌더 (순수 함수)
 # ---------------------------------------------------------------------------
+
 
 def _market_prompt(req: SummaryRequest) -> str:
     return f"""당신은 투자 전문가 어시스턴트입니다.
@@ -51,9 +52,7 @@ def _market_prompt(req: SummaryRequest) -> str:
 
 
 def _company_prompt(req: SummaryRequest) -> str:
-    symbol_context = (
-        f"관련 종목: {', '.join(req.symbols)}\n" if req.symbols else ""
-    )
+    symbol_context = f"관련 종목: {', '.join(req.symbols)}\n" if req.symbols else ""
     return f"""당신은 투자 전문가 어시스턴트입니다.
 {symbol_context}다음 기업 뉴스를 아침 브리핑용으로 한국어 3줄 이내로 요약하세요.
 

@@ -22,8 +22,8 @@ from app.jobs.collect_job import run_collect
 
 
 def main() -> int:
-    log_dir   = os.environ.get("LOG_DIR", "logs")
-    logger    = setup_job_logging("collect", os.environ.get("LOG_LEVEL", "INFO"), log_dir)
+    log_dir = os.environ.get("LOG_DIR", "logs")
+    logger = setup_job_logging("collect", os.environ.get("LOG_LEVEL", "INFO"), log_dir)
     db_config = DatabaseConfig.from_env()
 
     result = run_collect(db_config=db_config)

@@ -65,7 +65,7 @@ FROM news_articles a
 WHERE a.article_type = 'market'
   AND a.collected_at >= %(since)s
   AND a.collected_at <  %(until)s
-{_ORDER_BY.replace('a.', 'a.')}
+{_ORDER_BY.replace("a.", "a.")}
 LIMIT %(limit)s;
 """
 
@@ -83,7 +83,7 @@ FROM news_articles a
 WHERE a.article_type = 'event'
   AND a.collected_at >= %(since)s
   AND a.collected_at <  %(until)s
-{_ORDER_BY.replace('a.', 'a.')}
+{_ORDER_BY.replace("a.", "a.")}
 LIMIT %(limit)s;
 """
 
@@ -137,6 +137,7 @@ LIMIT %(limit)s;
 # ---------------------------------------------------------------------------
 # 조회 함수
 # ---------------------------------------------------------------------------
+
 
 def fetch_market_news(
     conn: psycopg2.extensions.connection,
@@ -243,6 +244,7 @@ def fetch_symbol_news(
 # ---------------------------------------------------------------------------
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
+
 
 def _row_to_article(row: tuple, symbols: list[str]) -> BriefingArticle:
     """(id, title, url, source_name, summary, article_type, published_at, collected_at) 행을 변환."""

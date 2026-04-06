@@ -22,6 +22,7 @@ from enum import Enum
 # 열거형
 # ---------------------------------------------------------------------------
 
+
 class Direction(str, Enum):
     """시그널 방향성.
 
@@ -30,10 +31,11 @@ class Direction(str, Enum):
     NEUTRAL : 방향성 불명확 (관망 또는 참고)
     MIXED   : 단기·장기 방향이 상반되거나 양면성이 있는 경우
     """
+
     BULLISH = "bullish"
     BEARISH = "bearish"
     NEUTRAL = "neutral"
-    MIXED   = "mixed"
+    MIXED = "mixed"
 
 
 # 한국어 레이블
@@ -41,7 +43,7 @@ DIRECTION_LABEL: dict[Direction, str] = {
     Direction.BULLISH: "긍정 (Bullish)",
     Direction.BEARISH: "부정 (Bearish)",
     Direction.NEUTRAL: "중립 (Neutral)",
-    Direction.MIXED:   "혼재 (Mixed)",
+    Direction.MIXED: "혼재 (Mixed)",
 }
 
 # 콘솔 출력용 심볼
@@ -49,7 +51,7 @@ DIRECTION_ICON: dict[Direction, str] = {
     Direction.BULLISH: "▲",
     Direction.BEARISH: "▼",
     Direction.NEUTRAL: "─",
-    Direction.MIXED:   "±",
+    Direction.MIXED: "±",
 }
 
 
@@ -60,15 +62,16 @@ class Horizon(str, Enum):
     LONG  : 장기 (수주~수개월 영향 예상)
     BOTH  : 단·장기 모두 영향
     """
+
     SHORT = "short"
-    LONG  = "long"
-    BOTH  = "both"
+    LONG = "long"
+    BOTH = "both"
 
 
 HORIZON_LABEL: dict[Horizon, str] = {
     Horizon.SHORT: "단기",
-    Horizon.LONG:  "장기",
-    Horizon.BOTH:  "단·장기",
+    Horizon.LONG: "장기",
+    Horizon.BOTH: "단·장기",
 }
 
 
@@ -79,21 +82,23 @@ class Importance(str, Enum):
     MEDIUM : 섹터/종목 수준의 유의미한 변화
     LOW    : 배경 정보 수준. 단독으로 판단 근거 삼기 어려움.
     """
-    HIGH   = "high"
+
+    HIGH = "high"
     MEDIUM = "medium"
-    LOW    = "low"
+    LOW = "low"
 
 
 IMPORTANCE_LABEL: dict[Importance, str] = {
-    Importance.HIGH:   "★★★ 높음",
+    Importance.HIGH: "★★★ 높음",
     Importance.MEDIUM: "★★☆ 중간",
-    Importance.LOW:    "★☆☆ 낮음",
+    Importance.LOW: "★☆☆ 낮음",
 }
 
 
 # ---------------------------------------------------------------------------
 # Signal
 # ---------------------------------------------------------------------------
+
 
 @dataclass(frozen=True)
 class Signal:
@@ -113,37 +118,38 @@ class Signal:
         published_at:  기사 발행 시각
     """
 
-    article_id:    int
+    article_id: int
     article_title: str
-    rule_name:     str
-    direction:     Direction
-    horizon:       Horizon
-    importance:    Importance
-    reason:        str
-    action_hint:   str
-    symbols:       list[str]
-    source_name:   str
-    published_at:  datetime | None = None
+    rule_name: str
+    direction: Direction
+    horizon: Horizon
+    importance: Importance
+    reason: str
+    action_hint: str
+    symbols: list[str]
+    source_name: str
+    published_at: datetime | None = None
 
     def to_dict(self) -> dict:
         return {
-            "article_id":    self.article_id,
+            "article_id": self.article_id,
             "article_title": self.article_title,
-            "rule_name":     self.rule_name,
-            "direction":     self.direction.value,
-            "horizon":       self.horizon.value,
-            "importance":    self.importance.value,
-            "reason":        self.reason,
-            "action_hint":   self.action_hint,
-            "symbols":       self.symbols,
-            "source_name":   self.source_name,
-            "published_at":  self.published_at.isoformat() if self.published_at else None,
+            "rule_name": self.rule_name,
+            "direction": self.direction.value,
+            "horizon": self.horizon.value,
+            "importance": self.importance.value,
+            "reason": self.reason,
+            "action_hint": self.action_hint,
+            "symbols": self.symbols,
+            "source_name": self.source_name,
+            "published_at": self.published_at.isoformat() if self.published_at else None,
         }
 
 
 # ---------------------------------------------------------------------------
 # SignalReport
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class SignalReport:
@@ -157,11 +163,11 @@ class SignalReport:
         analyzed_count:  분석한 기사 수 (시그널 미발생 포함)
     """
 
-    analyzed_at:     datetime
-    briefing_since:  datetime
-    briefing_until:  datetime
-    signals:         list[Signal] = field(default_factory=list)
-    analyzed_count:  int = 0
+    analyzed_at: datetime
+    briefing_since: datetime
+    briefing_until: datetime
+    signals: list[Signal] = field(default_factory=list)
+    analyzed_count: int = 0
 
     # ------------------------------------------------------------------
     # 파생 뷰

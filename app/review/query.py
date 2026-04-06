@@ -47,6 +47,7 @@ LIMIT %(limit)s;
 # 조회 함수
 # ---------------------------------------------------------------------------
 
+
 def fetch_all_articles(
     conn: psycopg2.extensions.connection,
     since: datetime,
@@ -84,6 +85,7 @@ def fetch_all_articles(
 # ---------------------------------------------------------------------------
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
+
 
 def _row_to_review_article(row: tuple) -> ReviewArticle:
     """쿼리 결과 행을 ReviewArticle로 변환한다.

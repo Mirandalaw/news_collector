@@ -30,68 +30,179 @@ ArticleType = Literal["market", "company", "event", "general"]
 # ---------------------------------------------------------------------------
 
 # event: 일정/예정/달력 성격의 단어가 포함될 때
-_EVENT_KEYWORDS: frozenset[str] = frozenset({
-    # 영문
-    "earnings calendar", "earnings schedule", "earnings date",
-    "economic calendar", "event calendar",
-    "ipo date", "ipo schedule", "goes public", "set to report",
-    "upcoming earnings", "expected to report",
-    "fomc meeting date", "fomc schedule",
-    # 국문
-    "실적 발표 일정", "발표 일정", "발표 예정", "발표예정",
-    "상장 일정", "공모 일정", "청약 일정",
-    "일정 공개", "일정 발표",
-})
+_EVENT_KEYWORDS: frozenset[str] = frozenset(
+    {
+        # 영문
+        "earnings calendar",
+        "earnings schedule",
+        "earnings date",
+        "economic calendar",
+        "event calendar",
+        "ipo date",
+        "ipo schedule",
+        "goes public",
+        "set to report",
+        "upcoming earnings",
+        "expected to report",
+        "fomc meeting date",
+        "fomc schedule",
+        # 국문
+        "실적 발표 일정",
+        "발표 일정",
+        "발표 예정",
+        "발표예정",
+        "상장 일정",
+        "공모 일정",
+        "청약 일정",
+        "일정 공개",
+        "일정 발표",
+    }
+)
 
 # company: 개별 기업 행위 (과거/현재 사실 위주)
-_COMPANY_KEYWORDS: frozenset[str] = frozenset({
-    # 실적/가이던스
-    "earnings", "실적", "revenue", "매출", "영업이익", "순이익",
-    "eps", "guidance", "가이던스", "beat", "miss", "어닝",
-    "분기 실적", "연간 실적", "quarterly results",
-    # 계약/딜
-    "계약", "contract", "deal", "partnership",
-    "인수", "acquisition", "merger", "m&a", "합병", "매각", "지분 취득",
-    # 규제/법률
-    "규제", "regulation", "제재", "sanctions",
-    "lawsuit", "소송", "벌금", "fine", "조사", "investigation",
-    "antitrust", "ftc", "공정위",
-    # 주주환원
-    "배당", "dividend", "buyback", "자사주", "주주환원",
-    # 경영진
-    "ceo", "cfo", "cto", "임원 교체", "대표 교체",
-})
+_COMPANY_KEYWORDS: frozenset[str] = frozenset(
+    {
+        # 실적/가이던스
+        "earnings",
+        "실적",
+        "revenue",
+        "매출",
+        "영업이익",
+        "순이익",
+        "eps",
+        "guidance",
+        "가이던스",
+        "beat",
+        "miss",
+        "어닝",
+        "분기 실적",
+        "연간 실적",
+        "quarterly results",
+        # 계약/딜
+        "계약",
+        "contract",
+        "deal",
+        "partnership",
+        "인수",
+        "acquisition",
+        "merger",
+        "m&a",
+        "합병",
+        "매각",
+        "지분 취득",
+        # 규제/법률
+        "규제",
+        "regulation",
+        "제재",
+        "sanctions",
+        "lawsuit",
+        "소송",
+        "벌금",
+        "fine",
+        "조사",
+        "investigation",
+        "antitrust",
+        "ftc",
+        "공정위",
+        # 주주환원
+        "배당",
+        "dividend",
+        "buyback",
+        "자사주",
+        "주주환원",
+        # 경영진
+        "ceo",
+        "cfo",
+        "cto",
+        "임원 교체",
+        "대표 교체",
+    }
+)
 
 # market: 거시경제 / 지수 / 원자재 / 환율
-_MARKET_KEYWORDS: frozenset[str] = frozenset({
-    # 금리/통화정책
-    "금리", "interest rate", "rate hike", "rate cut", "기준금리",
-    "monetary policy", "통화정책",
-    # 인플레이션
-    "cpi", "inflation", "인플레이션", "물가", "pce", "ppi",
-    # 중앙은행
-    "fomc", "federal reserve", "연준", "파월", "powell", "한국은행", "ecb",
-    # 채권/국채
-    "국채", "treasury", "bond yield", "채권금리", "10년물", "2년물",
-    # 원자재/에너지
-    "유가", "oil price", "wti", "brent", "원유", "천연가스", "natural gas",
-    "금값", "gold price", "구리",
-    # 환율/달러
-    "환율", "원달러", "달러 인덱스", "dollar index", "usdkrw", "위안",
-    # 거시경제
-    "gdp", "경기침체", "recession", "실업률", "unemployment", "고용지표",
-    "무역수지", "trade balance", "경상수지",
-    # 증시 지수
-    "코스피", "코스닥", "s&p 500", "s&p500", "nasdaq", "dow jones",
-    "russell", "nikkei", "항셍", "hang seng", "상해종합",
-    # 변동성
-    "vix", "공포지수",
-})
+_MARKET_KEYWORDS: frozenset[str] = frozenset(
+    {
+        # 금리/통화정책
+        "금리",
+        "interest rate",
+        "rate hike",
+        "rate cut",
+        "기준금리",
+        "monetary policy",
+        "통화정책",
+        # 인플레이션
+        "cpi",
+        "inflation",
+        "인플레이션",
+        "물가",
+        "pce",
+        "ppi",
+        # 중앙은행
+        "fomc",
+        "federal reserve",
+        "연준",
+        "파월",
+        "powell",
+        "한국은행",
+        "ecb",
+        # 채권/국채
+        "국채",
+        "treasury",
+        "bond yield",
+        "채권금리",
+        "10년물",
+        "2년물",
+        # 원자재/에너지
+        "유가",
+        "oil price",
+        "wti",
+        "brent",
+        "원유",
+        "천연가스",
+        "natural gas",
+        "금값",
+        "gold price",
+        "구리",
+        # 환율/달러
+        "환율",
+        "원달러",
+        "달러 인덱스",
+        "dollar index",
+        "usdkrw",
+        "위안",
+        # 거시경제
+        "gdp",
+        "경기침체",
+        "recession",
+        "실업률",
+        "unemployment",
+        "고용지표",
+        "무역수지",
+        "trade balance",
+        "경상수지",
+        # 증시 지수
+        "코스피",
+        "코스닥",
+        "s&p 500",
+        "s&p500",
+        "nasdaq",
+        "dow jones",
+        "russell",
+        "nikkei",
+        "항셍",
+        "hang seng",
+        "상해종합",
+        # 변동성
+        "vix",
+        "공포지수",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
 # Protocol
 # ---------------------------------------------------------------------------
+
 
 class ArticleClassifier(Protocol):
     """기사 분류 인터페이스.
@@ -120,6 +231,7 @@ class ArticleClassifier(Protocol):
 # ---------------------------------------------------------------------------
 # 구현체
 # ---------------------------------------------------------------------------
+
 
 class KeywordArticleClassifier:
     """키워드 substring 매칭 기반 기사 분류기.

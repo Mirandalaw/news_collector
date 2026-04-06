@@ -33,25 +33,29 @@ from app.summarizers.mock_summarizer import MockSummarizer
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="수집 → 브리핑 순차 실행")
 
-    parser.add_argument("--telegram",            action="store_true")
-    parser.add_argument("--save",                action="store_true")
-    parser.add_argument("--save-fmt",            default="text", choices=["text", "json"])
-    parser.add_argument("--save-dir",            default=os.environ.get("BRIEFING_OUTPUT_DIR", "output"))
-    parser.add_argument("--no-console",          action="store_true")
-    parser.add_argument("--mock",                action="store_true")
-    parser.add_argument("--hours",               type=int,
-                        default=int(os.environ.get("BRIEFING_HOURS_BACK", "12")))
-    parser.add_argument("--skip-on-collect-fail", action="store_true",
-                        help="수집 실패 시 브리핑 건너뜀 (기본: 브리핑 시도)")
+    parser.add_argument("--telegram", action="store_true")
+    parser.add_argument("--save", action="store_true")
+    parser.add_argument("--save-fmt", default="text", choices=["text", "json"])
+    parser.add_argument("--save-dir", default=os.environ.get("BRIEFING_OUTPUT_DIR", "output"))
+    parser.add_argument("--no-console", action="store_true")
+    parser.add_argument("--mock", action="store_true")
+    parser.add_argument(
+        "--hours", type=int, default=int(os.environ.get("BRIEFING_HOURS_BACK", "12"))
+    )
+    parser.add_argument(
+        "--skip-on-collect-fail",
+        action="store_true",
+        help="수집 실패 시 브리핑 건너뜀 (기본: 브리핑 시도)",
+    )
 
     return parser.parse_args()
 
 
 def main() -> int:
-    args    = _parse_args()
+    args = _parse_args()
     log_dir = os.environ.get("LOG_DIR", "logs")
-    logger  = setup_job_logging("all", os.environ.get("LOG_LEVEL", "INFO"), log_dir)
-    db_cfg  = DatabaseConfig.from_env()
+    logger = setup_job_logging("all", os.environ.get("LOG_LEVEL", "INFO"), log_dir)
+    db_cfg = DatabaseConfig.from_env()
 
     # ── 1단계: 수집 ────────────────────────────────────────────────
     logger.info("=" * 50)
@@ -87,9 +91,7 @@ def main() -> int:
     # ── 최종 요약 ──────────────────────────────────────────────────
     logger.info("=" * 50)
     all_ok = collect_result.success and briefing_result.success
-    total_elapsed = (
-        (collect_result.elapsed_seconds or 0) + (briefing_result.elapsed_seconds or 0)
-    )
+    total_elapsed = (collect_result.elapsed_seconds or 0) + (briefing_result.elapsed_seconds or 0)
     logger.info(
         "전체 완료 | collect=%s / briefing=%s | 총 %.1f초",
         "OK" if collect_result.success else "FAIL",

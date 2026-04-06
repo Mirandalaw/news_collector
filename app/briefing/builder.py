@@ -54,6 +54,7 @@ def build_morning_briefing(result: BriefingResult) -> MorningBriefing:
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
 
+
 def _to_items(articles: list[BriefingArticle]) -> list[BriefingItem]:
     return [_to_item(a) for a in articles]
 

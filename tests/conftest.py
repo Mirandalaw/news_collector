@@ -19,6 +19,7 @@ from app.utils.hashing import compute_title_hash
 # 공통 픽스처
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def fixed_now() -> datetime:
     """재현 가능한 고정 UTC datetime."""
@@ -28,6 +29,7 @@ def fixed_now() -> datetime:
 @pytest.fixture
 def make_article(fixed_now):
     """최소 필드로 NewsArticle을 생성하는 팩토리 픽스처."""
+
     def _factory(
         title: str = "기본 타이틀",
         url: str = "https://example.com/1",
@@ -43,6 +45,7 @@ def make_article(fixed_now):
             collected_at=fixed_now,
             title_hash=title_hash if title_hash is not None else compute_title_hash(title),
         )
+
     return _factory
 
 
@@ -66,6 +69,7 @@ def make_feed_entry(**kwargs) -> SimpleNamespace:
 # ---------------------------------------------------------------------------
 # 통합 테스트 전용 픽스처 (실제 DB 연결)
 # ---------------------------------------------------------------------------
+
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "integration: 실제 DB가 필요한 통합 테스트")

@@ -21,15 +21,22 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 DEFAULT_SOURCES: list[RssSource] = [
-    RssSource(url="https://feeds.yna.co.kr/economy.xml",    source_name="연합뉴스_경제", category="경제"),
-    RssSource(url="https://rss.hankyung.com/feed/it.xml",   source_name="한국경제_IT",   category="IT"),
-    RssSource(url="https://rss.hankyung.com/feed/economy.xml", source_name="한국경제_경제", category="경제"),
+    RssSource(
+        url="https://feeds.yna.co.kr/economy.xml", source_name="연합뉴스_경제", category="경제"
+    ),
+    RssSource(url="https://rss.hankyung.com/feed/it.xml", source_name="한국경제_IT", category="IT"),
+    RssSource(
+        url="https://rss.hankyung.com/feed/economy.xml",
+        source_name="한국경제_경제",
+        category="경제",
+    ),
 ]
 
 
 # ---------------------------------------------------------------------------
 # Job 진입점
 # ---------------------------------------------------------------------------
+
 
 def run_collect(
     db_config: DatabaseConfig,
@@ -49,12 +56,14 @@ def run_collect(
 
     logger.info(
         "뉴스 수집 시작 | DB=%s/%s | 소스=%d개",
-        db_config.host, db_config.dbname, len(sources),
+        db_config.host,
+        db_config.dbname,
+        len(sources),
     )
 
     try:
         service = NewsIngestionService(db_config=db_config, sources=sources)
-        report  = service.run()
+        report = service.run()
     except Exception as e:
         logger.exception("수집 파이프라인 오류")
         return JobResult(
@@ -67,7 +76,7 @@ def run_collect(
         )
 
     finished = datetime.now(timezone.utc)
-    success  = not report.all_failed
+    success = not report.all_failed
 
     detail = (
         f"수집={report.total_collected} / 저장={report.total_inserted} / "

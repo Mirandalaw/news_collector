@@ -48,8 +48,8 @@ class NewsArticle:
     collected_at: datetime
     published_at: datetime | None = None
     summary: str = ""
-    title_hash: str = ""          # SHA-256(normalize(title)). 빈 문자열 = 미계산
-    article_type: str = "general" # 의미 분류: market | company | event | general
+    title_hash: str = ""  # SHA-256(normalize(title)). 빈 문자열 = 미계산
+    article_type: str = "general"  # 의미 분류: market | company | event | general
 
 
 def insert_article(
@@ -100,7 +100,9 @@ def insert_article(
 
     except psycopg2.Error:
         conn.rollback()
-        logger.exception("저장 실패 - rollback | source=%s | url=%s", article.source_name, article.url)
+        logger.exception(
+            "저장 실패 - rollback | source=%s | url=%s", article.source_name, article.url
+        )
         raise
 
 

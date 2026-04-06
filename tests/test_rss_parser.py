@@ -16,6 +16,7 @@ from tests.conftest import make_feed_entry
 # parse_entry - 정상 케이스
 # ---------------------------------------------------------------------------
 
+
 class TestParseEntryNormal:
     def test_기본_필드_추출(self):
         entry = make_feed_entry(title="금리 동결 결정", link="https://news.com/1")
@@ -69,6 +70,7 @@ class TestParseEntryNormal:
 # parse_entry - 필수 필드 누락 → None 반환
 # ---------------------------------------------------------------------------
 
+
 class TestParseEntryMissingFields:
     def test_title_없으면_none(self):
         entry = make_feed_entry(title="")
@@ -90,6 +92,7 @@ class TestParseEntryMissingFields:
 # ---------------------------------------------------------------------------
 # parse_entry - 데이터 정제
 # ---------------------------------------------------------------------------
+
 
 class TestParseEntryDataCleaning:
     def test_title_앞뒤_공백_제거(self):
@@ -146,6 +149,7 @@ class TestParseEntryDataCleaning:
 # 내부 헬퍼 직접 테스트
 # ---------------------------------------------------------------------------
 
+
 class TestStripHtml:
     def test_태그_제거(self):
         assert "hello" in _strip_html("<p>hello</p>")
@@ -158,14 +162,17 @@ class TestStripHtml:
     def test_태그_없으면_원본_유지(self):
         assert _strip_html("plain text") == "plain text"
 
-    @pytest.mark.parametrize("entity,expected", [
-        ("&amp;", "&"),
-        ("&lt;", "<"),
-        ("&gt;", ">"),
-        ("&quot;", '"'),
-        ("&#39;", "'"),
-        ("&nbsp;", " "),
-    ])
+    @pytest.mark.parametrize(
+        "entity,expected",
+        [
+            ("&amp;", "&"),
+            ("&lt;", "<"),
+            ("&gt;", ">"),
+            ("&quot;", '"'),
+            ("&#39;", "'"),
+            ("&nbsp;", " "),
+        ],
+    )
     def test_html_엔티티_변환(self, entity, expected):
         assert _strip_html(entity) == expected
 

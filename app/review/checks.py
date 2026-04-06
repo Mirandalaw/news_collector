@@ -36,6 +36,7 @@ def detect_issues(articles: list[ReviewArticle]) -> list[ArticleIssue]:
 # 개별 감지기
 # ---------------------------------------------------------------------------
 
+
 def _check_no_summary(articles: list[ReviewArticle]) -> list[ArticleIssue]:
     """요약 텍스트가 비어 있는 기사를 감지한다."""
     return [
@@ -66,11 +67,13 @@ def _check_duplicate_hash(articles: list[ReviewArticle]) -> list[ArticleIssue]:
         all_ids = [str(d.id) for d in dupes]
         for a in dupes:
             other_ids = [i for i in all_ids if i != str(a.id)]
-            issues.append(ArticleIssue(
-                article_id=a.id,
-                kind=IssueKind.DUPLICATE_HASH,
-                detail=f"동일 title_hash 기사 id: {', '.join(other_ids)}",
-            ))
+            issues.append(
+                ArticleIssue(
+                    article_id=a.id,
+                    kind=IssueKind.DUPLICATE_HASH,
+                    detail=f"동일 title_hash 기사 id: {', '.join(other_ids)}",
+                )
+            )
     return issues
 
 
@@ -90,11 +93,13 @@ def _check_untagged_watchlist(articles: list[ReviewArticle]) -> list[ArticleIssu
             if any(kw in text for kw in ws.keywords):
                 matched.append(ws.symbol)
         if matched:
-            issues.append(ArticleIssue(
-                article_id=a.id,
-                kind=IssueKind.UNTAGGED_WATCHLIST,
-                detail=f"감지된 종목 키워드: {', '.join(matched)} / 태그 없음",
-            ))
+            issues.append(
+                ArticleIssue(
+                    article_id=a.id,
+                    kind=IssueKind.UNTAGGED_WATCHLIST,
+                    detail=f"감지된 종목 키워드: {', '.join(matched)} / 태그 없음",
+                )
+            )
     return issues
 
 
@@ -111,9 +116,11 @@ def _check_misclassification(articles: list[ReviewArticle]) -> list[ArticleIssue
         if inferred == "general":
             continue  # 분류기도 확신 없으면 패스
         if inferred != a.article_type:
-            issues.append(ArticleIssue(
-                article_id=a.id,
-                kind=IssueKind.MISCLASSIFICATION,
-                detail=f"저장={a.article_type} / 키워드재분류={inferred}",
-            ))
+            issues.append(
+                ArticleIssue(
+                    article_id=a.id,
+                    kind=IssueKind.MISCLASSIFICATION,
+                    detail=f"저장={a.article_type} / 키워드재분류={inferred}",
+                )
+            )
     return issues

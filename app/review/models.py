@@ -24,10 +24,10 @@ class IssueKind(str, Enum):
 
 # IssueKind별 한국어 설명
 ISSUE_LABEL: dict[IssueKind, str] = {
-    IssueKind.NO_SUMMARY:         "요약 없음",
-    IssueKind.DUPLICATE_HASH:     "중복 수집 의심",
+    IssueKind.NO_SUMMARY: "요약 없음",
+    IssueKind.DUPLICATE_HASH: "중복 수집 의심",
     IssueKind.UNTAGGED_WATCHLIST: "종목 태그 누락",
-    IssueKind.MISCLASSIFICATION:  "분류 불일치",
+    IssueKind.MISCLASSIFICATION: "분류 불일치",
 }
 
 

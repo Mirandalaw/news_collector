@@ -30,14 +30,15 @@ from app.publishers.base import PublishResult
 
 logger = logging.getLogger(__name__)
 
-_API_URL   = "https://api.telegram.org/bot{token}/sendMessage"
-_MAX_CHARS = 4000   # Telegram 한도 4096에서 여유 확보
-_TIMEOUT   = 10     # 초
+_API_URL = "https://api.telegram.org/bot{token}/sendMessage"
+_MAX_CHARS = 4000  # Telegram 한도 4096에서 여유 확보
+_TIMEOUT = 10  # 초
 
 
 # ---------------------------------------------------------------------------
 # 설정
 # ---------------------------------------------------------------------------
+
 
 @dataclass(frozen=True)
 class TelegramConfig:
@@ -67,6 +68,7 @@ class TelegramConfig:
 # ---------------------------------------------------------------------------
 # Publisher
 # ---------------------------------------------------------------------------
+
 
 class TelegramPublisher:
     """브리핑을 텔레그램으로 전송하는 Publisher.
@@ -102,7 +104,8 @@ class TelegramPublisher:
                 sent += 1
             logger.info(
                 "텔레그램 전송 완료 | chat_id=%s | %d개 청크",
-                self._config.chat_id, sent,
+                self._config.chat_id,
+                sent,
             )
             return PublishResult(
                 publisher=self.publisher_name,
@@ -132,9 +135,10 @@ class TelegramPublisher:
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
 
+
 def _send_message(config: TelegramConfig, text: str) -> None:
     """Telegram sendMessage API를 호출한다."""
-    url     = _API_URL.format(token=config.bot_token)
+    url = _API_URL.format(token=config.bot_token)
     payload = json.dumps({"chat_id": config.chat_id, "text": text}).encode()
     request = urllib.request.Request(
         url,

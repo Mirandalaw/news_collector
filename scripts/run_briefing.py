@@ -37,22 +37,23 @@ from app.summarizers.mock_summarizer import MockSummarizer
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="아침 브리핑 생성 및 전송")
 
-    parser.add_argument("--telegram",   action="store_true", help="텔레그램으로 전송")
-    parser.add_argument("--save",       action="store_true", help="파일로 저장")
-    parser.add_argument("--save-fmt",   default="text", choices=["text", "json"])
-    parser.add_argument("--save-dir",   default=os.environ.get("BRIEFING_OUTPUT_DIR", "output"))
+    parser.add_argument("--telegram", action="store_true", help="텔레그램으로 전송")
+    parser.add_argument("--save", action="store_true", help="파일로 저장")
+    parser.add_argument("--save-fmt", default="text", choices=["text", "json"])
+    parser.add_argument("--save-dir", default=os.environ.get("BRIEFING_OUTPUT_DIR", "output"))
     parser.add_argument("--no-console", action="store_true", help="콘솔 출력 비활성화")
-    parser.add_argument("--mock",       action="store_true", help="MockSummarizer 사용")
-    parser.add_argument("--hours",      type=int,
-                        default=int(os.environ.get("BRIEFING_HOURS_BACK", "12")))
+    parser.add_argument("--mock", action="store_true", help="MockSummarizer 사용")
+    parser.add_argument(
+        "--hours", type=int, default=int(os.environ.get("BRIEFING_HOURS_BACK", "12"))
+    )
 
     return parser.parse_args()
 
 
 def main() -> int:
-    args      = _parse_args()
-    log_dir   = os.environ.get("LOG_DIR", "logs")
-    logger    = setup_job_logging("briefing", os.environ.get("LOG_LEVEL", "INFO"), log_dir)
+    args = _parse_args()
+    log_dir = os.environ.get("LOG_DIR", "logs")
+    logger = setup_job_logging("briefing", os.environ.get("LOG_LEVEL", "INFO"), log_dir)
     db_config = DatabaseConfig.from_env()
 
     publishers = build_publishers(

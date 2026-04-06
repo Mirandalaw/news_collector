@@ -26,6 +26,7 @@ CHECKS: list[tuple[str, bool, str]] = []
 
 def check(name: str):
     """데코레이터: 함수 실행 결과를 CHECKS에 기록한다."""
+
     def decorator(fn):
         def wrapper():
             try:
@@ -33,7 +34,9 @@ def check(name: str):
                 CHECKS.append((name, True, "OK"))
             except Exception as e:
                 CHECKS.append((name, False, str(e)))
+
         return wrapper
+
     return decorator
 
 
@@ -41,6 +44,7 @@ def check(name: str):
 @check("DB 연결")
 def _check_db_connection():
     from app.db.connection import DatabaseConfig, get_connection
+
     conn = get_connection(DatabaseConfig.from_env())
     conn.close()
 
@@ -49,6 +53,7 @@ def _check_db_connection():
 @check("테이블 존재: news_articles")
 def _check_table_exists():
     from app.db.connection import DatabaseConfig, managed_connection
+
     with managed_connection(DatabaseConfig.from_env()) as conn:
         with conn.cursor() as cur:
             cur.execute("""

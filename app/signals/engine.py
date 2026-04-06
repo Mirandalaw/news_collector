@@ -96,10 +96,12 @@ class SignalEngine:
         # 중요도(HIGH→LOW) → 방향(bullish→bearish→mixed→neutral) 순 정렬
         importance_order = {"high": 0, "medium": 1, "low": 2}
         direction_order = {"bullish": 0, "bearish": 1, "mixed": 2, "neutral": 3}
-        signals.sort(key=lambda s: (
-            importance_order.get(s.importance.value, 9),
-            direction_order.get(s.direction.value, 9),
-        ))
+        signals.sort(
+            key=lambda s: (
+                importance_order.get(s.importance.value, 9),
+                direction_order.get(s.direction.value, 9),
+            )
+        )
         return signals
 
 
@@ -107,13 +109,12 @@ class SignalEngine:
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
 
+
 def _collect_unique(result: BriefingResult) -> list[BriefingArticle]:
     """세 섹션에서 중복 없는 기사 목록을 수집한다."""
     seen: set[int] = set()
     unique: list[BriefingArticle] = []
-    for article in (
-        result.market_news + result.symbol_news + result.event_news
-    ):
+    for article in result.market_news + result.symbol_news + result.event_news:
         if article.id not in seen:
             seen.add(article.id)
             unique.append(article)

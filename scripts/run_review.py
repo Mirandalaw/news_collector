@@ -76,7 +76,9 @@ def _resolve_window(args: argparse.Namespace) -> tuple[datetime, datetime]:
         try:
             target: date = date.fromisoformat(args.date)
         except ValueError:
-            print(f"[ERROR] --date 형식 오류: '{args.date}' (YYYY-MM-DD 형식 필요)", file=sys.stderr)
+            print(
+                f"[ERROR] --date 형식 오류: '{args.date}' (YYYY-MM-DD 형식 필요)", file=sys.stderr
+            )
             sys.exit(1)
         # 지정 날짜 KST 00:00 ~ 다음날 KST 00:00
         since_kst = datetime(target.year, target.month, target.day, tzinfo=KST)
@@ -91,6 +93,7 @@ def _resolve_window(args: argparse.Namespace) -> tuple[datetime, datetime]:
 
 def _setup_logging(level_name: str) -> None:
     import logging
+
     level = getattr(logging, level_name.upper(), logging.WARNING)
     logging.basicConfig(
         level=level,

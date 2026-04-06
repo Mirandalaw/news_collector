@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 # 입력 파라미터
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class BriefingQuery:
     """브리핑 조회 파라미터.
@@ -51,6 +52,7 @@ class BriefingQuery:
 # ---------------------------------------------------------------------------
 # 결과 구조
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class BriefingResult:
@@ -86,7 +88,7 @@ class BriefingResult:
         )
         _log_section("market", self.market_news)
         _log_section("symbol", self.symbol_news)
-        _log_section("event",  self.event_news)
+        _log_section("event", self.event_news)
 
     def to_dict(self) -> dict:
         """직렬화 가능한 dict로 변환한다. JSON 출력 / 디버깅용."""
@@ -95,13 +97,14 @@ class BriefingResult:
             "until": self.query.until.isoformat(),
             "market_news": [_article_to_dict(a) for a in self.market_news],
             "symbol_news": [_article_to_dict(a) for a in self.symbol_news],
-            "event_news":  [_article_to_dict(a) for a in self.event_news],
+            "event_news": [_article_to_dict(a) for a in self.event_news],
         }
 
 
 # ---------------------------------------------------------------------------
 # 서비스
 # ---------------------------------------------------------------------------
+
 
 class BriefingService:
     """아침 브리핑 조회 파이프라인.
@@ -139,30 +142,30 @@ class BriefingService:
 
         try:
             with managed_connection(self._db_config) as conn:
-                market_news = fetch_market_news(
-                    conn, query.since, query.until, query.market_limit
-                )
+                market_news = fetch_market_news(conn, query.since, query.until, query.market_limit)
                 symbol_news = fetch_symbol_news(
-                    conn, query.since, query.until,
+                    conn,
+                    query.since,
+                    query.until,
                     symbols=query.symbols or None,
                     limit=query.symbol_limit,
                 )
-                event_news = fetch_event_news(
-                    conn, query.since, query.until, query.event_limit
-                )
+                event_news = fetch_event_news(conn, query.since, query.until, query.event_limit)
         except psycopg2.Error:
             logger.exception("브리핑 조회 실패")
             raise
 
         # 요약기가 주입된 경우 섹션별 일괄 요약 적용
         if self._summarizer is not None:
-            market_news  = _apply_summarizer(self._summarizer, market_news)
-            symbol_news  = _apply_summarizer(self._summarizer, symbol_news)
-            event_news   = _apply_summarizer(self._summarizer, event_news)
+            market_news = _apply_summarizer(self._summarizer, market_news)
+            symbol_news = _apply_summarizer(self._summarizer, symbol_news)
+            event_news = _apply_summarizer(self._summarizer, event_news)
             logger.info(
                 "요약 완료 | provider=%s | market=%d / symbol=%d / event=%d",
                 self._summarizer.provider_name,
-                len(market_news), len(symbol_news), len(event_news),
+                len(market_news),
+                len(symbol_news),
+                len(event_news),
             )
 
         result = BriefingResult(
@@ -178,6 +181,7 @@ class BriefingService:
 # ---------------------------------------------------------------------------
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
+
 
 def _apply_summarizer(
     summarizer: Summarizer,
@@ -197,10 +201,7 @@ def _apply_summarizer(
         for a in articles
     ]
     responses = summarizer.summarize_batch(requests)
-    return [
-        dataclasses.replace(a, ai_summary=r.text)
-        for a, r in zip(articles, responses)
-    ]
+    return [dataclasses.replace(a, ai_summary=r.text) for a, r in zip(articles, responses)]
 
 
 def _log_section(name: str, articles: list[BriefingArticle]) -> None:

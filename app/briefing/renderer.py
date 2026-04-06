@@ -13,13 +13,14 @@ from app.briefing.models import BriefingItem, BriefingSection, MorningBriefing
 
 _WIDTH = 62
 _THICK = "═" * _WIDTH
-_THIN  = "─" * _WIDTH
+_THIN = "─" * _WIDTH
 _BLANK = ""
 
 
 # ---------------------------------------------------------------------------
 # 공개 함수
 # ---------------------------------------------------------------------------
+
 
 def render_text(briefing: MorningBriefing) -> str:
     """MorningBriefing을 사람이 읽기 좋은 텍스트로 변환한다.
@@ -46,11 +47,12 @@ def render_text(briefing: MorningBriefing) -> str:
 # 섹션별 렌더러
 # ---------------------------------------------------------------------------
 
+
 def _render_header(briefing: MorningBriefing) -> list[str]:
-    date_str  = briefing.since.strftime("%Y-%m-%d")
+    date_str = briefing.since.strftime("%Y-%m-%d")
     since_str = briefing.since.strftime("%H:%M")
     until_str = briefing.until.strftime("%H:%M UTC")
-    gen_str   = briefing.generated_at.strftime("%Y-%m-%d %H:%M UTC")
+    gen_str = briefing.generated_at.strftime("%Y-%m-%d %H:%M UTC")
 
     return [
         _THICK,
@@ -81,7 +83,7 @@ def _render_item(idx: int, item: BriefingItem) -> list[str]:
     lines: list[str] = []
 
     # 제목 줄: 번호 + 제목 + 종목 태그
-    sym_tag  = f"  [{', '.join(item.symbols)}]" if item.symbols else ""
+    sym_tag = f"  [{', '.join(item.symbols)}]" if item.symbols else ""
     lines.append(f"{idx:2d}. {item.title}{sym_tag}")
 
     # 메타 줄: 출처 + 발행 시각
@@ -105,9 +107,7 @@ def _render_item(idx: int, item: BriefingItem) -> list[str]:
 
 def _render_footer(briefing: MorningBriefing) -> list[str]:
     non_empty = [s for s in briefing.sections if not s.is_empty]
-    section_summary = "  ".join(
-        f"{s.emoji} {s.title} {s.count}건" for s in non_empty
-    )
+    section_summary = "  ".join(f"{s.emoji} {s.title} {s.count}건" for s in non_empty)
     return [
         _THIN,
         f"  {section_summary}" if section_summary else "  결과 없음",

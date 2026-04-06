@@ -38,12 +38,14 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="투자 시그널 분석")
 
     parser.add_argument(
-        "--hours", type=int,
+        "--hours",
+        type=int,
         default=int(os.environ.get("BRIEFING_HOURS_BACK", "12")),
         help="조회 시간 범위 (기본: 12)",
     )
-    parser.add_argument("--no-symbols", action="store_true",
-                        help="관심 종목 필터 없이 전체 태깅 기사 분석")
+    parser.add_argument(
+        "--no-symbols", action="store_true", help="관심 종목 필터 없이 전체 태깅 기사 분석"
+    )
     parser.add_argument("--fmt", default="text", choices=["text", "json"])
     parser.add_argument("--save", action="store_true")
     parser.add_argument("--save-dir", default=os.environ.get("BRIEFING_OUTPUT_DIR", "output"))
@@ -55,6 +57,7 @@ def _parse_args() -> argparse.Namespace:
 
 def _setup_logging(level_name: str) -> None:
     import logging
+
     level = getattr(logging, level_name.upper(), logging.WARNING)
     logging.basicConfig(
         level=level,

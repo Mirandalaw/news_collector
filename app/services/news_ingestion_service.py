@@ -28,10 +28,10 @@ class SourceIngestionResult:
     """소스별 수집 + 저장 결과."""
 
     source_name: str
-    collected: int = 0   # RSS에서 파싱된 기사 수
-    inserted: int = 0    # DB에 신규 저장된 기사 수
-    skipped: int = 0     # 중복으로 skip된 기사 수
-    tagged: int = 0      # 1개 이상 종목이 태깅된 기사 수
+    collected: int = 0  # RSS에서 파싱된 기사 수
+    inserted: int = 0  # DB에 신규 저장된 기사 수
+    skipped: int = 0  # 중복으로 skip된 기사 수
+    tagged: int = 0  # 1개 이상 종목이 태깅된 기사 수
     failed: bool = False
     error: str = ""
 
@@ -261,9 +261,7 @@ class NewsIngestionService:
                 insert_article_symbols(conn, article_id, symbols, tagged_by=tagger_name)
                 conn.commit()
                 tagged_count += 1
-                logger.debug(
-                    "태깅 완료 | article_id=%d | symbols=%s", article_id, symbols
-                )
+                logger.debug("태깅 완료 | article_id=%d | symbols=%s", article_id, symbols)
             except psycopg2.Error:
                 conn.rollback()
                 logger.exception("태깅 저장 실패 - 스킵 | article_id=%d", article_id)

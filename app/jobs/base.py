@@ -17,6 +17,7 @@ from pathlib import Path
 # 결과 모델
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class JobResult:
     """Job 실행 결과.
@@ -44,10 +45,10 @@ class JobResult:
         return (self.finished_at - self.started_at).total_seconds()
 
     def log_summary(self, logger: logging.Logger) -> None:
-        status   = "완료" if self.success else "실패"
-        elapsed  = f" | {self.elapsed_seconds:.1f}s" if self.elapsed_seconds is not None else ""
-        detail   = f" | {self.detail}" if self.detail else ""
-        level    = logging.INFO if self.success else logging.ERROR
+        status = "완료" if self.success else "실패"
+        elapsed = f" | {self.elapsed_seconds:.1f}s" if self.elapsed_seconds is not None else ""
+        detail = f" | {self.detail}" if self.detail else ""
+        level = logging.INFO if self.success else logging.ERROR
         logger.log(level, "[%s] %s%s%s", self.job_name, status, elapsed, detail)
         if self.error:
             logger.error("  오류: %s", self.error)
@@ -60,6 +61,7 @@ class JobResult:
 # ---------------------------------------------------------------------------
 # 로깅 설정
 # ---------------------------------------------------------------------------
+
 
 def setup_job_logging(
     job_name: str,
@@ -86,7 +88,7 @@ def setup_job_logging(
     if root.handlers:
         root.handlers.clear()
 
-    fmt     = logging.Formatter(
+    fmt = logging.Formatter(
         fmt="%(asctime)s  %(levelname)-8s  %(name)s  %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )

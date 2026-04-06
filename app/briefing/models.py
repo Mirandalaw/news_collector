@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 # 기사 단위
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class BriefingItem:
     """브리핑에 표시되는 기사 1건.
@@ -48,6 +49,7 @@ class BriefingItem:
 # ---------------------------------------------------------------------------
 # 섹션 단위
 # ---------------------------------------------------------------------------
+
 
 @dataclass(frozen=True)
 class BriefingSection:
@@ -83,6 +85,7 @@ class BriefingSection:
 # 브리핑 최상위
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class MorningBriefing:
     """아침 브리핑 완성 결과.
@@ -114,6 +117,7 @@ class MorningBriefing:
     def to_text(self) -> str:
         """사람이 읽기 좋은 텍스트 브리핑을 반환한다."""
         from app.briefing.renderer import render_text
+
         return render_text(self)
 
     def to_dict(self) -> dict:
@@ -126,7 +130,7 @@ class MorningBriefing:
             "sections": {
                 "market": self.market_section.to_dict(),
                 "symbol": self.symbol_section.to_dict(),
-                "event":  self.event_section.to_dict(),
+                "event": self.event_section.to_dict(),
             },
         }
 
@@ -134,6 +138,7 @@ class MorningBriefing:
 # ---------------------------------------------------------------------------
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
+
 
 def _item_to_dict(item: BriefingItem) -> dict:
     return {

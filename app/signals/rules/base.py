@@ -20,6 +20,7 @@ from app.signals.models import Direction, Horizon, Importance, Signal
 # Protocol
 # ---------------------------------------------------------------------------
 
+
 @runtime_checkable
 class SignalRule(Protocol):
     """시그널 규칙 인터페이스.
@@ -50,6 +51,7 @@ class SignalRule(Protocol):
 # KeywordSignalRule
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class KeywordSignalRule:
     """키워드 substring 매칭 기반 시그널 규칙.
@@ -68,17 +70,17 @@ class KeywordSignalRule:
         enabled:         False이면 엔진이 완전히 무시
     """
 
-    name:             str
+    name: str
     trigger_keywords: tuple[str, ...]
-    direction:        Direction
-    horizon:          Horizon
-    importance:       Importance
-    reason:           str
-    action_hint:      str
-    veto_keywords:    tuple[str, ...] = field(default_factory=tuple)
-    target_symbols:   tuple[str, ...] = field(default_factory=tuple)
-    target_types:     tuple[str, ...] = field(default_factory=tuple)
-    enabled:          bool = True
+    direction: Direction
+    horizon: Horizon
+    importance: Importance
+    reason: str
+    action_hint: str
+    veto_keywords: tuple[str, ...] = field(default_factory=tuple)
+    target_symbols: tuple[str, ...] = field(default_factory=tuple)
+    target_types: tuple[str, ...] = field(default_factory=tuple)
+    enabled: bool = True
 
     # Protocol 준수
     @property
