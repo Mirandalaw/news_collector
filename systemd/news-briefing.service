@@ -1,0 +1,24 @@
+[Unit]
+Description=News Collector — 브리핑 생성 + 텔레그램 전송 Job
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=kdpark
+WorkingDirectory=/home/kdpark/news_collector
+
+EnvironmentFile=/home/kdpark/news_collector/.env
+
+ExecStart=/home/kdpark/news_collector/.venv/bin/python \
+    /home/kdpark/news_collector/scripts/run_briefing.py \
+    --telegram --no-console
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=news-briefing
+
+TimeoutStopSec=180
+
+[Install]
+WantedBy=multi-user.target

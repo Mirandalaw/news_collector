@@ -1,0 +1,31 @@
+# 시크릿 / 환경변수
+.env
+
+# 가상환경
+.venv/
+venv/
+
+# 로그 및 출력 결과물
+logs/
+output/
+
+# Python 빌드 아티팩트
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# 테스트 / 커버리지
+.pytest_cache/
+.coverage
+htmlcov/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

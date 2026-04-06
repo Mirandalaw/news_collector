@@ -1,0 +1,12 @@
+[Unit]
+Description=News Collector — 매일 오전 6시 10분 브리핑 전송
+Requires=news-briefing.service
+
+[Timer]
+# KST 06:10 = UTC 21:10 (전날)
+OnCalendar=*-*-* 21:10:00 UTC
+Persistent=true
+AccuracySec=60
+
+[Install]
+WantedBy=timers.target

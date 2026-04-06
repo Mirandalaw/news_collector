@@ -1,0 +1,14 @@
+[Unit]
+Description=News Collector — 매일 오전 6시 RSS 수집
+Requires=news-collect.service
+
+[Timer]
+# KST 06:00 = UTC 21:00 (전날)
+OnCalendar=*-*-* 21:00:00 UTC
+# 시스템 재부팅 후 서비스가 실행 안 됐으면 즉시 실행
+Persistent=true
+# 정확한 시각에서 최대 60초 지연 허용 (부하 분산)
+AccuracySec=60
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,86 @@
+# ── 공통 설정 앵커 ────────────────────────────────────────────
+# 모든 배치 서비스는 이 앵커를 상속한다.
+# 이미지를 한 번만 빌드하고 공유 (news-collector:latest)
+x-app: &app-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: news-collector:latest
+  restart: "no"
+  env_file: .env
+  environment:
+    DB_HOST: db
+    DB_PORT: "5432"
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+
+  # ── PostgreSQL (항상 실행) ─────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${DB_NAME:-news_collector}
+      POSTGRES_USER:     ${DB_USER:-news}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # 첫 컨테이너 시작(빈 볼륨)에만 실행되는 스키마 초기화 SQL
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-news} -d ${DB_NAME:-news_collector}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s   # Beelink 첫 초기화(느린 스토리지) 여유 확보
+
+  # ── 배치 잡 서비스 ────────────────────────────────────────────
+  # 직접 실행 금지 — 반드시 아래 명령 사용:
+  #   docker compose run --rm collect
+  #   docker compose run --rm briefing
+  #   docker compose run --rm all
+  #
+  # cron 예시 (호스트):
+  #   0 21 * * *   cd /home/kdpark/news_collector && docker compose run --rm collect
+  #  10 21 * * *   cd /home/kdpark/news_collector && docker compose run --rm briefing
+
+  collect:
+    <<: *app-base
+    command: ["python", "scripts/run_collect.py"]
+    volumes:
+      - ./logs:/app/logs
+    profiles: ["jobs"]
+
+  briefing:
+    <<: *app-base
+    command: ["python", "scripts/run_briefing.py", "--telegram", "--no-console"]
+    volumes:
+      - ./logs:/app/logs
+      - ./output:/app/output
+    profiles: ["jobs"]
+
+  all:
+    <<: *app-base
+    command: ["python", "scripts/run_all.py", "--telegram", "--no-console"]
+    volumes:
+      - ./logs:/app/logs
+      - ./output:/app/output
+    profiles: ["jobs"]
+
+  # ── 유틸리티 ──────────────────────────────────────────────────
+  smoke:
+    <<: *app-base
+    command: ["python", "scripts/smoke_test.py"]
+    profiles: ["tools"]
+
+  metrics:
+    <<: *app-base
+    command: ["python", "scripts/run_metrics.py", "--stats"]
+    profiles: ["tools"]
+
+volumes:
+  pgdata:

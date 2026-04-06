@@ -1,0 +1,26 @@
+[Unit]
+Description=News Collector — RSS 수집 Job
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=kdpark
+WorkingDirectory=/home/kdpark/news_collector
+
+# 환경변수는 .env 파일에서 로드
+EnvironmentFile=/home/kdpark/news_collector/.env
+
+ExecStart=/home/kdpark/news_collector/.venv/bin/python \
+    /home/kdpark/news_collector/scripts/run_collect.py
+
+# 표준 출력도 journald로 (systemd-journald가 처리)
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=news-collect
+
+# 타임아웃 (수집이 5분 넘으면 강제 종료)
+TimeoutStopSec=300
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,58 @@
+# ============================================================
+# news_collector crontab 설정 예시
+#
+# 등록 방법:
+#   crontab -e
+#   아래 내용을 붙여넣고 경로를 실제 환경에 맞게 수정
+#
+# 경로 변수:
+#   PROJ  = 프로젝트 루트 절대경로
+#   VENV  = .venv 내 python 절대경로
+# ============================================================
+
+SHELL=/bin/zsh
+PATH=/usr/local/bin:/usr/bin:/bin
+
+# 프로젝트 경로 (수정 필요)
+PROJ=/Users/kdpark/Desktop/WorkSpace/news_collector
+VENV=$PROJ/.venv/bin/python
+
+# DB 접속
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=news_collector
+DB_USER=kdpark
+DB_PASSWORD=
+
+# 텔레그램
+TELEGRAM_BOT_TOKEN=8730089200:AAGQP6c6oKKJKkB7aQKhUg6u4Ns6_F47kr8
+TELEGRAM_CHAT_ID=8719466596
+
+# 로그
+LOG_LEVEL=INFO
+LOG_DIR=$PROJ/logs
+BRIEFING_OUTPUT_DIR=$PROJ/output
+
+
+# ── 옵션 A: 수집 + 브리핑 분리 실행 (권장) ──────────────────
+# 매일 오전 6:00  뉴스 수집
+0  6 * * *  $VENV $PROJ/scripts/run_collect.py
+
+# 매일 오전 6:10  브리핑 생성 + 텔레그램 전송
+10 6 * * *  $VENV $PROJ/scripts/run_briefing.py --telegram --no-console
+
+
+# ── 옵션 B: 단일 작업으로 통합 실행 ─────────────────────────
+# 매일 오전 6:00  수집 → 브리핑 순차 실행
+# 0 6 * * *  $VENV $PROJ/scripts/run_all.py --telegram --no-console
+
+
+# ── 추가 옵션 예시 ────────────────────────────────────────────
+# 파일도 함께 저장
+# 10 6 * * *  $VENV $PROJ/scripts/run_briefing.py --telegram --save --save-fmt json --no-console
+
+# 하루 2회 수집 (오전 6시 + 낮 12시)
+# 0  6,12 * * *  $VENV $PROJ/scripts/run_collect.py
+
+# 주말 제외 실행 (월~금)
+# 0  6 * * 1-5  $VENV $PROJ/scripts/run_all.py --telegram --no-console
