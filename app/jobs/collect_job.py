@@ -9,10 +9,13 @@ RSS 소스 목록에서 뉴스를 수집해 DB에 저장하는 단일 함수.
 import logging
 from datetime import datetime, timezone
 
+from app.classifiers.article_classifier import KeywordArticleClassifier
 from app.collectors.rss_collector import RssSource
 from app.db.connection import DatabaseConfig
 from app.jobs.base import JobResult
 from app.services.news_ingestion_service import NewsIngestionService
+from app.sources.watchlist import DEFAULT_WATCHLIST
+from app.taggers.keyword_tagger import KeywordTagger
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +83,12 @@ def run_collect(
     )
 
     try:
-        service = NewsIngestionService(db_config=db_config, sources=sources)
+        service = NewsIngestionService(
+            db_config=db_config,
+            sources=sources,
+            symbol_tagger=KeywordTagger(DEFAULT_WATCHLIST),
+            article_classifier=KeywordArticleClassifier(),
+        )
         report = service.run()
     except Exception as e:
         logger.exception("수집 파이프라인 오류")
