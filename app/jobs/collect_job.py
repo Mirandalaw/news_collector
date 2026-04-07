@@ -21,14 +21,36 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 DEFAULT_SOURCES: list[RssSource] = [
+    # ── 매일경제 ──────────────────────────────────────────────────
+    RssSource(url="https://www.mk.co.kr/rss/30000001/", source_name="매일경제", category="경제"),
     RssSource(
-        url="https://feeds.yna.co.kr/economy.xml", source_name="연합뉴스_경제", category="경제"
+        url="https://www.mk.co.kr/rss/30100041/", source_name="매일경제_주식", category="증권"
     ),
-    RssSource(url="https://rss.hankyung.com/feed/it.xml", source_name="한국경제_IT", category="IT"),
     RssSource(
-        url="https://rss.hankyung.com/feed/economy.xml",
-        source_name="한국경제_경제",
-        category="경제",
+        url="https://www.mk.co.kr/rss/30300018/", source_name="매일경제_국제", category="국제"
+    ),
+    RssSource(
+        url="https://www.mk.co.kr/rss/30200030/", source_name="매일경제_IT", category="IT"
+    ),
+    # ── 한국경제 ──────────────────────────────────────────────────
+    RssSource(
+        url="https://www.hankyung.com/feed/all-news", source_name="한국경제", category="경제"
+    ),
+    RssSource(
+        url="https://www.hankyung.com/feed/finance", source_name="한국경제_증권", category="증권"
+    ),
+    RssSource(url="https://www.hankyung.com/feed/it", source_name="한국경제_IT", category="IT"),
+    RssSource(
+        url="https://www.hankyung.com/feed/international",
+        source_name="한국경제_국제",
+        category="국제",
+    ),
+    # ── 전자신문 ──────────────────────────────────────────────────
+    RssSource(
+        url="https://rss.etnews.com/Section901.xml", source_name="전자신문", category="IT"
+    ),
+    RssSource(
+        url="https://rss.etnews.com/Section902.xml", source_name="전자신문_ICT", category="IT"
     ),
 ]
 

@@ -1,0 +1,25 @@
+[Unit]
+Description=News Collector — GitHub Webhook 서버
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kdpark
+WorkingDirectory=/opt/news-collector
+
+# webhook secret은 별도 env 파일로 관리 (.env와 분리)
+EnvironmentFile=/opt/news-collector/.env.webhook
+
+ExecStart=/usr/bin/python3 /opt/news-collector/webhook_server.py
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=news-webhook
+
+# 크래시 시 10초 후 자동 재시작
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
