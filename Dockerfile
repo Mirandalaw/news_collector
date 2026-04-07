@@ -22,6 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 앱 코드 복사
 COPY app/     app/
 COPY scripts/ scripts/
+COPY webhook_server.py .
 
 # logs/, output/ 는 docker-compose.yml 볼륨 마운트로 처리
 CMD ["python", "scripts/run_all.py", "--telegram", "--no-console"]

@@ -81,6 +81,18 @@ services:
     <<: *app-base
     command: ["python", "scripts/run_metrics.py", "--stats"]
     profiles: ["tools"]
+  
+  webhook:
+    <<: *app-base
+    command: ["python", "webhook_server.py"]
+    env_file:
+      - .env
+      - .env.webhook
+    volumes:
+      - ./logs:/app/logs
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
 
 volumes:
   pgdata:
