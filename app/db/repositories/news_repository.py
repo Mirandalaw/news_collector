@@ -35,7 +35,10 @@ INSERT INTO news_articles (
     %(title_hash)s,
     %(article_type)s
 )
-ON CONFLICT (url) DO NOTHING;
+ON CONFLICT (url) DO UPDATE
+    SET article_type = EXCLUDED.article_type
+    WHERE news_articles.article_type = 'general'
+RETURNING (xmax = 0) AS is_new;
 """
 
 
@@ -58,7 +61,8 @@ def insert_article(
 ) -> bool:
     """뉴스 기사 1건을 삽입한다.
 
-    URL이 이미 존재하면 삽입을 건너뛴다(ON CONFLICT DO NOTHING).
+    URL이 이미 존재하고 article_type이 'general'이면 재분류(UPDATE)한다.
+    URL이 이미 존재하고 article_type이 이미 분류된 경우 아무것도 하지 않는다.
     삽입 성공 시 commit, 실패 시 rollback한다.
 
     Args:
@@ -67,7 +71,7 @@ def insert_article(
 
     Returns:
         True  - 신규 삽입 성공
-        False - URL 중복으로 skip
+        False - URL 중복(재분류 포함)으로 skip
 
     Raises:
         psycopg2.Error: 예상치 못한 DB 오류 발생 시 rollback 후 재발생
@@ -88,7 +92,8 @@ def insert_article(
                     "article_type": article.article_type,
                 },
             )
-            inserted = cur.rowcount == 1
+            row = cur.fetchone()
+            inserted = bool(row and row[0])  # is_new=True → 신규 INSERT
         conn.commit()
 
         if inserted:
@@ -145,7 +150,8 @@ def insert_articles(
                         "article_type": article.article_type,
                     },
                 )
-                if cur.rowcount == 1:
+                row = cur.fetchone()
+                if row and row[0]:  # is_new=True → 신규 INSERT
                     inserted_count += 1
                     logger.debug("저장 대상 | url=%s", article.url)
                 else:
