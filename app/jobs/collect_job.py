@@ -29,9 +29,7 @@ DEFAULT_SOURCES: list[RssSource] = [
     RssSource(
         url="https://www.mk.co.kr/rss/30300018/", source_name="매일경제_국제", category="국제"
     ),
-    RssSource(
-        url="https://www.mk.co.kr/rss/30200030/", source_name="매일경제_IT", category="IT"
-    ),
+    RssSource(url="https://www.mk.co.kr/rss/30200030/", source_name="매일경제_IT", category="IT"),
     # ── 한국경제 ──────────────────────────────────────────────────
     RssSource(
         url="https://www.hankyung.com/feed/all-news", source_name="한국경제", category="경제"
@@ -46,9 +44,7 @@ DEFAULT_SOURCES: list[RssSource] = [
         category="국제",
     ),
     # ── 전자신문 ──────────────────────────────────────────────────
-    RssSource(
-        url="https://rss.etnews.com/Section901.xml", source_name="전자신문", category="IT"
-    ),
+    RssSource(url="https://rss.etnews.com/Section901.xml", source_name="전자신문", category="IT"),
     RssSource(
         url="https://rss.etnews.com/Section902.xml", source_name="전자신문_ICT", category="IT"
     ),
