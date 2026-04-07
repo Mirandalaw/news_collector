@@ -48,11 +48,11 @@ logger = logging.getLogger("webhook")
 _deploy_lock = threading.Lock()
 
 
-def _run(cmd: list[str], cwd: str) -> tuple[int, str, str]:
+def _run(cmd: list[str]) -> tuple[int, str, str]:
     """명령어를 실행하고 (returncode, stdout, stderr)를 반환한다."""
     result = subprocess.run(
         cmd,
-        cwd=cwd,
+        cwd=PROJECT_DIR,
         capture_output=True,
         text=True,
         timeout=300,
@@ -60,11 +60,16 @@ def _run(cmd: list[str], cwd: str) -> tuple[int, str, str]:
     return result.returncode, result.stdout.strip(), result.stderr.strip()
 
 
+def _is_up_to_date(output: str) -> bool:
+    normalized = output.strip().rstrip(".")
+    return normalized == "Already up to date"
+
+
 def deploy() -> bool:
-    """git pull → docker compose build 를 순서대로 실행한다.
+    """git pull → docker compose build → db 재시작을 순서대로 실행한다.
 
     Returns:
-        True: 전체 성공, False: 실패
+        True: 성공, False: 실패
     """
     if not _deploy_lock.acquire(blocking=False):
         logger.warning("배포 이미 진행 중 — 요청 무시")
@@ -74,34 +79,30 @@ def deploy() -> bool:
         logger.info("배포 시작 | dir=%s | branch=%s", PROJECT_DIR, DEPLOY_BRANCH)
 
         # 1. git pull
-        code, out, err = _run(["git", "pull", "origin", DEPLOY_BRANCH], cwd=PROJECT_DIR)
+        code, out, err = _run(["git", "pull", "origin", DEPLOY_BRANCH])
         if code != 0:
-            logger.error("git pull 실패 (code=%d)\n%s", code, err)
+            logger.error("git pull 실패 (code=%d)\nstdout: %s\nstderr: %s", code, out, err)
             return False
         logger.info("git pull 완료\n%s", out)
 
-        # Already up to date 이면 build 스킵
-        if "Already up to date" in out:
+        # 변경 없으면 build/재시작 스킵
+        if _is_up_to_date(out):
             logger.info("변경 없음 — build 스킵")
             return True
 
         # 2. docker compose build
-        code, out, err = _run(
-            ["docker", "compose", "build"],
-            cwd=PROJECT_DIR,
-        )
+        code, out, err = _run(["docker", "compose", "build"])
         if code != 0:
-            logger.error("docker compose build 실패 (code=%d)\n%s", code, err)
+            logger.error(
+                "docker compose build 실패 (code=%d)\nstdout: %s\nstderr: %s", code, out, err
+            )
             return False
         logger.info("docker compose build 완료")
 
-        # 3. DB 컨테이너 재시작 (스키마 변경 등 반영)
-        code, out, err = _run(
-            ["docker", "compose", "up", "-d", "--no-deps", "db"],
-            cwd=PROJECT_DIR,
-        )
+        # 3. db 컨테이너 재시작 (스키마 변경 등 반영)
+        code, out, err = _run(["docker", "compose", "up", "-d", "--no-deps", "db"])
         if code != 0:
-            logger.warning("db 재시작 실패 (code=%d) — 무시하고 계속\n%s", code, err)
+            logger.warning("db 재시작 실패 (code=%d) — 무시하고 계속\nstderr: %s", code, err)
 
         logger.info("배포 완료")
         return True
