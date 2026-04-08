@@ -11,10 +11,12 @@ DB 조회 원시 결과(BriefingResult)를 브리핑 표시 모델(MorningBriefi
   - summary_text: ai_summary가 있으면 우선 사용, 없으면 원본 summary 사용
 """
 
+import dataclasses
 import logging
 from collections import defaultdict
 from datetime import datetime, timezone
 
+from app.briefing.event_classifier import classify_event_type
 from app.briefing.models import BriefingItem, BriefingSection, MorningBriefing
 from app.db.repositories.briefing_repository import BriefingArticle
 from app.services.briefing_service import BriefingResult
@@ -86,7 +88,7 @@ def build_morning_briefing(
     event_section = BriefingSection(
         title="오늘 체크할 이벤트",
         emoji="📅",
-        items=_group_and_build(result.event_news, signal_map),
+        items=_build_event_section(result, signal_map),
     )
 
     return MorningBriefing(
@@ -267,6 +269,51 @@ def _group_and_build(
         len(items),
     )
     return items
+
+
+_MAX_EVENT_ITEMS = 10
+
+
+def _build_event_section(
+    result: BriefingResult,
+    signal_map: dict[int, list[Signal]],
+    max_items: int = _MAX_EVENT_ITEMS,
+) -> list[BriefingItem]:
+    """event_news + keyword-matched 기사를 합쳐 event_section 아이템을 빌드한다.
+
+    1. result.event_news를 기본으로 포함한다.
+    2. market_news + deduplicated_symbol_news 중 event_type 매칭 기사를 추가한다.
+       (이미 event_news에 있는 id는 제외)
+    3. 그룹핑 후 event_type 태그를 부여하고 max_items 제한을 적용한다.
+    """
+    covered_ids: set[int] = {a.id for a in result.event_news}
+
+    additional: list[BriefingArticle] = []
+    for article in result.market_news + result.deduplicated_symbol_news:
+        if article.id not in covered_ids and classify_event_type(article.title) is not None:
+            additional.append(article)
+            covered_ids.add(article.id)
+
+    all_articles = list(result.event_news) + additional
+    if not all_articles:
+        return []
+
+    items = _group_and_build(all_articles, signal_map)
+
+    # event_type 태그 부여
+    tagged: list[BriefingItem] = []
+    for item in items:
+        event_type = classify_event_type(item.title)
+        tagged.append(dataclasses.replace(item, event_type=event_type))
+
+    logger.debug(
+        "_build_event_section | event_news=%d건 + 추가=%d건 → 그룹=%d개 (limit=%d)",
+        len(result.event_news),
+        len(additional),
+        len(tagged),
+        max_items,
+    )
+    return tagged[:max_items]
 
 
 # ---------------------------------------------------------------------------

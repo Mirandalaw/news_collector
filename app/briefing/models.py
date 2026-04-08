@@ -47,6 +47,7 @@ class BriefingItem:
     signals: list[Signal] = field(default_factory=list)
     article_count: int = 1
     sources: list[str] = field(default_factory=list)
+    event_type: str | None = None  # 이벤트 섹션 분류 태그 (rate/oil/earnings/policy/geopolitics)
 
 
 # ---------------------------------------------------------------------------
@@ -155,4 +156,5 @@ def _item_to_dict(item: BriefingItem) -> dict:
         "signals": [s.to_dict() for s in item.signals],
         "article_count": item.article_count,
         "sources": item.sources,
+        "event_type": item.event_type,
     }

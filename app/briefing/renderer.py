@@ -23,6 +23,14 @@ _THICK = "═" * _WIDTH
 _THIN = "─" * _WIDTH
 _BLANK = ""
 
+_EVENT_TYPE_LABEL: dict[str, str] = {
+    "rate": "금리",
+    "oil": "유가",
+    "earnings": "실적",
+    "policy": "정책",
+    "geopolitics": "지정학",
+}
+
 
 # ---------------------------------------------------------------------------
 # 공개 함수
@@ -89,9 +97,14 @@ def _render_section(section: BriefingSection) -> list[str]:
 def _render_item(idx: int, item: BriefingItem) -> list[str]:
     lines: list[str] = []
 
-    # 제목 줄: 번호 + 제목 + 종목 태그
+    # 제목 줄: 번호 + 제목 + 종목 태그 + 이벤트 타입 태그
     sym_tag = f"  [{', '.join(item.symbols)}]" if item.symbols else ""
-    lines.append(f"{idx:2d}. {item.title}{sym_tag}")
+    event_tag = (
+        f"  [{_EVENT_TYPE_LABEL.get(item.event_type, item.event_type)}]"
+        if item.event_type
+        else ""
+    )
+    lines.append(f"{idx:2d}. {item.title}{sym_tag}{event_tag}")
 
     # 메타 줄: 출처 + 그룹 정보 + 발행 시각
     time_part = ""
