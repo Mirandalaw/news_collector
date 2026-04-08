@@ -256,9 +256,9 @@ def fetch_symbol_news(
 
 
 def _row_to_article(row: tuple, symbols: list[str]) -> BriefingArticle:
-    """(id, title, url, source_name, summary, article_type, published_at, collected_at, title_hash) 행 변환.
+    """market/event 쿼리 row를 BriefingArticle로 변환한다.
 
-    market/event 쿼리 row 인덱스:
+    row 인덱스:
       0=id, 1=title, 2=url, 3=source_name, 4=summary, 5=article_type,
       6=published_at, 7=collected_at, 8=title_hash
     """
