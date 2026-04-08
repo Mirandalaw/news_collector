@@ -10,6 +10,13 @@
 """
 
 from app.briefing.models import BriefingItem, BriefingSection, MorningBriefing
+from app.signals.models import (
+    DIRECTION_ICON,
+    DIRECTION_LABEL,
+    HORIZON_LABEL,
+    IMPORTANCE_LABEL,
+    Signal,
+)
 
 _WIDTH = 62
 _THICK = "═" * _WIDTH
@@ -86,11 +93,18 @@ def _render_item(idx: int, item: BriefingItem) -> list[str]:
     sym_tag = f"  [{', '.join(item.symbols)}]" if item.symbols else ""
     lines.append(f"{idx:2d}. {item.title}{sym_tag}")
 
-    # 메타 줄: 출처 + 발행 시각
+    # 메타 줄: 출처 + 그룹 정보 + 발행 시각
     time_part = ""
     if item.published_at:
         time_part = f"  ({item.published_at.strftime('%m/%d %H:%M')})"
-    lines.append(f"    출처: {item.source_name}{time_part}")
+
+    if item.article_count > 1:
+        other_sources = item.sources[1:]  # 대표 소스 제외
+        others_str = f" ({', '.join(other_sources)})" if other_sources else ""
+        group_part = f"  +{item.article_count - 1}건{others_str}"
+        lines.append(f"    출처: {item.source_name}{group_part}{time_part}")
+    else:
+        lines.append(f"    출처: {item.source_name}{time_part}")
 
     # 요약 줄 (들여쓰기)
     if item.summary_text:
@@ -98,11 +112,30 @@ def _render_item(idx: int, item: BriefingItem) -> list[str]:
             if summary_line.strip():
                 lines.append(f"    › {summary_line.strip()}")
 
+    # signal 블록 (최대 2개)
+    if item.signals:
+        for signal in item.signals[:2]:
+            lines.extend(_render_signal(signal))
+
     # URL
     lines.append(f"    {item.url}")
     lines.append(_BLANK)
 
     return lines
+
+
+def _render_signal(signal: Signal) -> list[str]:
+    """Signal 1건을 2줄로 렌더링한다."""
+    importance_label = IMPORTANCE_LABEL.get(signal.importance, str(signal.importance.value))
+    direction_icon = DIRECTION_ICON.get(signal.direction, "?")
+    direction_label = DIRECTION_LABEL.get(signal.direction, str(signal.direction.value))
+    horizon_label = HORIZON_LABEL.get(signal.horizon, str(signal.horizon.value))
+
+    return [
+        f"    {importance_label} | {direction_icon} {direction_label} | {horizon_label}",
+        f"    › {signal.reason}",
+        f"    › [힌트] {signal.action_hint}",
+    ]
 
 
 def _render_footer(briefing: MorningBriefing) -> list[str]:

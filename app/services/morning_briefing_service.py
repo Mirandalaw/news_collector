@@ -15,6 +15,7 @@ from app.briefing.builder import build_morning_briefing
 from app.briefing.models import MorningBriefing
 from app.db.connection import DatabaseConfig
 from app.services.briefing_service import BriefingQuery, BriefingService
+from app.signals.engine import SignalEngine
 from app.summarizers.base import Summarizer
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,8 @@ class MorningBriefingService:
             psycopg2.OperationalError: DB 접속 실패 시
         """
         result = self._briefing_service.run(query)
-        briefing = build_morning_briefing(result)
+        signal_report = SignalEngine().analyze(result)
+        briefing = build_morning_briefing(result, signal_report)
 
         logger.info(
             "브리핑 생성 완료 | since=%s | market=%d / symbol=%d / event=%d",

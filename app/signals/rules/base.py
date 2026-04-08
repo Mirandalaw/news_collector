@@ -91,9 +91,10 @@ class KeywordSignalRule:
         if not self.enabled:
             return None
 
-        # article_type 필터
+        # article_type 필터 (general = 미분류 상태 → 모든 규칙 대상)
         if self.target_types and article.article_type not in self.target_types:
-            return None
+            if article.article_type != "general":
+                return None
 
         # 종목 필터 (target_symbols 지정 시 교집합이 있어야 함)
         if self.target_symbols:

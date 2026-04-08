@@ -12,10 +12,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    pass  # 순환 임포트 방지용
+from app.signals.models import Signal
 
 
 # ---------------------------------------------------------------------------
@@ -25,16 +23,19 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class BriefingItem:
-    """브리핑에 표시되는 기사 1건.
+    """브리핑에 표시되는 기사 1건 (또는 그룹 대표 기사).
 
     Attributes:
-        article_id: DB primary key
+        article_id: DB primary key (대표 기사 id)
         title: 기사 제목
-        source_name: 뉴스 소스
+        source_name: 뉴스 소스 (대표 기사 소스)
         url: 원문 URL
         summary_text: 표시용 요약 (ai_summary 우선, 없으면 원본 summary)
         symbols: 매칭된 종목 코드 목록
         published_at: 기사 발행 시각 (없을 수 있음)
+        signals: 그룹 내 전체 기사에서 수집한 시그널 (importance 내림차순)
+        article_count: 같은 title_hash로 묶인 총 기사 수 (단독이면 1)
+        sources: 그룹 내 모든 source_name (대표 소스 첫 번째, 중복 제거)
     """
 
     article_id: int
@@ -44,6 +45,9 @@ class BriefingItem:
     summary_text: str
     symbols: list[str] = field(default_factory=list)
     published_at: datetime | None = None
+    signals: list[Signal] = field(default_factory=list)
+    article_count: int = 1
+    sources: list[str] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -149,4 +153,7 @@ def _item_to_dict(item: BriefingItem) -> dict:
         "summary_text": item.summary_text,
         "symbols": item.symbols,
         "published_at": item.published_at.isoformat() if item.published_at else None,
+        "signals": [s.to_dict() for s in item.signals],
+        "article_count": item.article_count,
+        "sources": item.sources,
     }

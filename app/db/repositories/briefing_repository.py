@@ -30,6 +30,8 @@ class BriefingArticle:
         published_at: 기사 발행 시각 (없을 수 있음)
         collected_at: 수집 시각
         symbols: 매칭된 종목 코드 목록 (symbol_news 아닌 경우 빈 리스트)
+        ai_summary: LLM 요약 결과. 요약기 미주입 시 빈 문자열.
+        title_hash: SHA-256(normalize(title)). 빈 문자열 = 미계산.
     """
 
     id: int
@@ -42,6 +44,7 @@ class BriefingArticle:
     collected_at: datetime
     symbols: list[str] = field(default_factory=list)
     ai_summary: str = ""  # LLM 요약 결과. 요약기 미주입 시 빈 문자열.
+    title_hash: str = ""  # 그룹핑 기준. 빈 문자열 = 미계산 → 단독 그룹.
 
 
 # ---------------------------------------------------------------------------
@@ -60,7 +63,8 @@ SELECT
     COALESCE(a.summary, '')  AS summary,
     a.article_type,
     a.published_at,
-    a.collected_at
+    a.collected_at,
+    COALESCE(a.title_hash, '') AS title_hash
 FROM news_articles a
 WHERE a.article_type = 'market'
   AND a.collected_at >= %(since)s
@@ -78,7 +82,8 @@ SELECT
     COALESCE(a.summary, '')  AS summary,
     a.article_type,
     a.published_at,
-    a.collected_at
+    a.collected_at,
+    COALESCE(a.title_hash, '') AS title_hash
 FROM news_articles a
 WHERE a.article_type = 'event'
   AND a.collected_at >= %(since)s
@@ -89,6 +94,7 @@ LIMIT %(limit)s;
 
 # symbol_news: 종목 태그가 달린 기사 전체 (article_type 무관)
 # GROUP BY로 기사당 1행 보장, array_agg로 모든 매칭 종목을 하나의 행에 포함
+# row[8] = symbols, row[9] = title_hash
 _SELECT_SYMBOL_NEWS_ALL = f"""
 SELECT
     a.id,
@@ -99,18 +105,20 @@ SELECT
     a.article_type,
     a.published_at,
     a.collected_at,
-    array_agg(DISTINCT s.symbol ORDER BY s.symbol)  AS symbols
+    array_agg(DISTINCT s.symbol ORDER BY s.symbol)  AS symbols,
+    COALESCE(a.title_hash, '')                      AS title_hash
 FROM news_articles a
 JOIN article_symbols s ON a.id = s.article_id
 WHERE a.collected_at >= %(since)s
   AND a.collected_at <  %(until)s
 GROUP BY a.id, a.title, a.url, a.source_name, a.summary,
-         a.article_type, a.published_at, a.collected_at
+         a.article_type, a.published_at, a.collected_at, a.title_hash
 {_ORDER_BY}
 LIMIT %(limit)s;
 """
 
 # 관심 종목 목록으로 필터링된 symbol_news
+# row[8] = symbols, row[9] = title_hash
 _SELECT_SYMBOL_NEWS_FILTERED = f"""
 SELECT
     a.id,
@@ -121,14 +129,15 @@ SELECT
     a.article_type,
     a.published_at,
     a.collected_at,
-    array_agg(DISTINCT s.symbol ORDER BY s.symbol)  AS symbols
+    array_agg(DISTINCT s.symbol ORDER BY s.symbol)  AS symbols,
+    COALESCE(a.title_hash, '')                      AS title_hash
 FROM news_articles a
 JOIN article_symbols s ON a.id = s.article_id
 WHERE a.collected_at >= %(since)s
   AND a.collected_at <  %(until)s
   AND s.symbol = ANY(%(symbols)s)
 GROUP BY a.id, a.title, a.url, a.source_name, a.summary,
-         a.article_type, a.published_at, a.collected_at
+         a.article_type, a.published_at, a.collected_at, a.title_hash
 {_ORDER_BY}
 LIMIT %(limit)s;
 """
@@ -247,7 +256,15 @@ def fetch_symbol_news(
 
 
 def _row_to_article(row: tuple, symbols: list[str]) -> BriefingArticle:
-    """(id, title, url, source_name, summary, article_type, published_at, collected_at) 행 변환."""
+    """(id, title, url, source_name, summary, article_type, published_at, collected_at, title_hash) 행 변환.
+
+    market/event 쿼리 row 인덱스:
+      0=id, 1=title, 2=url, 3=source_name, 4=summary, 5=article_type,
+      6=published_at, 7=collected_at, 8=title_hash
+    """
+    logger.debug(
+        "_row_to_article | row_len=%d | row[8]=%r", len(row), row[8] if len(row) > 8 else "MISSING"
+    )
     return BriefingArticle(
         id=row[0],
         title=row[1],
@@ -258,11 +275,22 @@ def _row_to_article(row: tuple, symbols: list[str]) -> BriefingArticle:
         published_at=row[6],
         collected_at=row[7],
         symbols=symbols,
+        title_hash=row[8] if len(row) > 8 else "",
     )
 
 
 def _row_to_symbol_article(row: tuple) -> BriefingArticle:
-    """DB 행(id~symbols 9열)을 BriefingArticle로 변환."""
+    """DB 행(id~title_hash 10열)을 BriefingArticle로 변환.
+
+    symbol 쿼리 row 인덱스:
+      0=id, 1=title, 2=url, 3=source_name, 4=summary, 5=article_type,
+      6=published_at, 7=collected_at, 8=symbols, 9=title_hash
+    """
+    logger.debug(
+        "_row_to_symbol_article | row_len=%d | row[9]=%r",
+        len(row),
+        row[9] if len(row) > 9 else "MISSING",
+    )
     return BriefingArticle(
         id=row[0],
         title=row[1],
@@ -273,4 +301,5 @@ def _row_to_symbol_article(row: tuple) -> BriefingArticle:
         published_at=row[6],
         collected_at=row[7],
         symbols=list(row[8]) if row[8] else [],
+        title_hash=row[9] if len(row) > 9 else "",
     )
