@@ -55,18 +55,23 @@ _IMPORTANCE_ORDER: dict[str, int] = {
 
 def build_morning_briefing(
     result: BriefingResult,
-    signal_report: SignalReport,
+    signal_report: SignalReport | None = None,
 ) -> MorningBriefing:
     """BriefingResult + SignalReport를 MorningBriefing으로 변환한다.
 
     Args:
         result: BriefingService.run()의 반환값
-        signal_report: SignalEngine.analyze()의 반환값
+        signal_report: SignalEngine.analyze()의 반환값. None이면 빈 SignalReport 사용.
 
     Returns:
         섹션별로 정리된 MorningBriefing
     """
-    signal_map = _build_signal_map(signal_report)
+    _report = signal_report or SignalReport(
+        analyzed_at=datetime.now(timezone.utc),
+        briefing_since=result.query.since,
+        briefing_until=result.query.until,
+    )
+    signal_map = _build_signal_map(_report)
 
     market_section = BriefingSection(
         title="오늘 시장",
@@ -217,7 +222,9 @@ def _to_item_from_group(
     signals: list[Signal],
 ) -> BriefingItem:
     """대표 기사 + 그룹 메타 + signal을 BriefingItem으로 조립한다."""
-    summary_text = representative.ai_summary if representative.ai_summary else representative.summary
+    summary_text = (
+        representative.ai_summary if representative.ai_summary else representative.summary
+    )
     sources = _group_sources(representative, group)
 
     return BriefingItem(
