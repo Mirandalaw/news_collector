@@ -93,6 +93,12 @@ services:
     ports:
       - "9000:9000"
     restart: unless-stopped
-
+  
+  cleanup:
+    <<: *app-base
+    command: ["python", "-m", "app.jobs.cleanup_job"]
+    volumes:
+      - ./logs:/app/logs
+    profiles: ["jobs"]
 volumes:
   pgdata:
