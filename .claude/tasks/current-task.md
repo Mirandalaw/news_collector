@@ -1,80 +1,112 @@
 # CURRENT TASK
 
 ## 작업명
-event classifier 오분류 보정
+cleanup job 기본 구조 생성
 
 ## 목표
-event 섹션에서 발생하는 잘못된 event_type 분류를 줄인다.
+retention 정책에 따라 오래된 데이터를 정리할 수 있는 cleanup job의 기본 실행 구조를 만든다.
+
+현재 단계에서는 실제 삭제 로직 전체를 한 번에 구현하지 않고,  
+기존 job 패턴에 맞는 cleanup job의 뼈대와 실행 흐름을 먼저 만든다.
+
+---
 
 ## 현재 상태
-- builder 레이어에서 event 재분류 구현 완료
-- event_section 정상 출력됨 (빈 섹션 문제 해결됨)
-- event_type:
-  - rate / oil / earnings / policy / geopolitics
-- classify_event_type(title) 기반 substring 매칭 사용
-- 일부 기사에서 잘못된 event_type이 붙는 문제 발생
 
-## 확인된 문제
+- 뉴스 수집 및 브리핑 시스템의 MVP는 구현 완료 상태다
+- event 섹션은 구현 및 1차 보정이 완료되었고 관찰 단계다
+- retention 정책은 `data-retention.md`에 정의되어 있다
+- cleanup 구현 설계는 `cleanup-design.md`에 정리되어 있다
+- 현재 `cleanup_job.py`는 아직 존재하지 않는다
 
-### 1. oil 오분류
-- 예:
-  "日 학생 5000명 방울 달고 등교..." → [유가]
-- 실제로는 유가와 무관한 기사
-- substring 매칭이 너무 넓게 잡혀 있을 가능성
+즉, 현재 단계는  
+**cleanup 기능의 실제 구현을 시작하기 전, 기본 구조를 만드는 단계**이다.
 
-### 2. geopolitics 과매칭
-- 예:
-  "전쟁추경..." → [지정학]
-- 실제로는 정책/재정 성격이 더 강함
-
-### 3. keyword 기반 분류 한계
-- 짧은 키워드 또는 일반 단어 포함 시 오분류 발생 가능
+---
 
 ## 이번 단계에서 해야 할 일
 
-1. `event_classifier.py`의 keyword 목록 점검
-2. 특히 아래 타입 집중 분석
-   - oil
-   - policy
-   - geopolitics
+1. `app/jobs/cleanup_job.py` 파일 생성
+2. 기존 `collect_job.py`, `briefing_job.py`와 동일한 job 패턴 사용
+3. CLI 인자 구조 추가
+   - `--dry-run`
+   - `--target articles|metrics|all`
+4. 함수 뼈대 작성
+   - `cleanup_articles(dry_run: bool)`
+   - `cleanup_metrics(dry_run: bool)`
+   - `main()`
+5. `setup_job_logging`, `JobResult`, `try_record_job_run` 패턴 연결
+6. target에 따라 articles / metrics / all 분기되는 실행 흐름 구성
 
-3. 오분류를 유발할 가능성이 높은 keyword 식별
-
-4. 최소 수정으로 keyword 보정
-   - 너무 일반적인 단어 제거
-   - 의미가 명확한 키워드로 교체
-   - 필요 시 키워드 축소
+---
 
 ## 이번 단계에서 하지 말아야 할 일
 
-- builder 로직 수정 금지
-- DB 구조 변경 금지
-- event_type 구조 변경 금지
-- 다중 event_type 허용 금지
-- classifier 구조 변경 금지 (substring 방식 유지)
-- config 외부화 금지
+아래 작업은 이번 단계의 범위가 아니다.
 
-## 수정 원칙
+- 실제 DELETE SQL 구현
+- archive 기능 추가
+- config/env 외부화
+- 다른 job 파일 리팩토링
+- builder / renderer / classifier 수정
+- cleanup 통계 고도화
+- 관리자용 기능 추가
 
-- 보수적으로 수정한다
-- 오탐 감소를 우선한다
-- 일부 누락보다 오분류 제거가 더 중요하다
-- 최소 변경으로 효과를 낸다
+---
+
+## 이번 단계의 설계 원칙
+
+1. 기존 job 구조를 그대로 따른다
+2. 작은 변경으로 시작한다
+3. 실행 가능한 뼈대를 먼저 만든다
+4. 다음 단계에서 dry-run과 delete를 붙일 수 있는 형태로 만든다
+5. 과한 추상화 없이 명확한 함수 구조를 유지한다
+
+---
 
 ## 완료 조건
 
-- 명백한 오분류 케이스 제거
-- oil / geopolitics 오탐 감소
-- 기존 정상 분류 케이스는 유지
-- 수정 후 재실행 시 event 섹션 품질 개선 확인
+아래 조건을 만족하면 이번 단계는 완료다.
 
-## 검증 방법
+1. `cleanup_job.py` 파일이 생성되어 있다
+2. CLI 인자 파싱이 동작한다
+3. `--target` 값에 따라 분기된다
+4. `cleanup_articles`, `cleanup_metrics`, `main` 구조가 존재한다
+5. logging / JobResult / try_record_job_run 패턴이 기존 job과 일관된다
+6. 다음 단계에서 dry-run 로직만 붙이면 될 상태다
 
-1. `docker compose --profile jobs run --rm all` 실행
-2. event 섹션 확인
+---
 
-체크리스트:
-- [ ] 의미 없는 기사에 event_type이 붙지 않음
-- [ ] 금리 / 유가 / 지정학 기사만 남음
-- [ ] event 개수 과도하지 않음
-- [ ] market과 완전 동일 리스트가 아님
+## 다음 단계
+
+이번 단계 완료 후 다음 순서로 진행한다.
+
+1. dry-run 구현
+2. articles 대상 건수 조회
+3. metrics 대상 건수 조회
+4. 실제 batch delete 구현
+5. 수동 실행 검증
+6. cron 등록
+
+---
+
+## 참고 문서
+
+이번 작업에서는 아래 문서를 반드시 따른다.
+
+- `project-overview.md`
+- `data-retention.md`
+- `cleanup-design.md`
+- `constraints.md`
+- `output-format.md`
+
+---
+
+## 작업 판단 기준
+
+이번 단계의 좋은 결과는 아래와 같다.
+
+- cleanup job이 기존 구조와 자연스럽게 맞물린다
+- 다음 단계 구현이 쉽게 이어진다
+- 변경 범위가 작고 명확하다
+- 불필요한 기능이 추가되지 않는다
