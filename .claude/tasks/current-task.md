@@ -1,90 +1,59 @@
 # CURRENT TASK
 
 ## 작업명
-dedup v2 threshold / normalize 검증
+dedup v2 normalize 보강 - 숫자 토큰 제거
 
 ## 목표
-dedup v2가 기대만큼 기사 중복을 줄이지 못하는 이유를,
-threshold 후보와 normalize 상태 기준으로 분석한다.
+dedup v2에서 similarity를 불필요하게 낮추는 수치 토큰을 normalize_title 단계에서 제거한다.
 
-현재 단계에서는 코드를 바로 수정하지 않고,
-threshold 0.55 후보가 적절한지와 normalize 부족 여부를 먼저 판단한다.
+현재 단계에서는 threshold를 변경하지 않고,
+normalize_title의 입력 품질만 보수적으로 개선한다.
 
 ---
 
 ## 현재 상태
 
-- cleanup / retention 구현 완료
-- event 섹션은 안정화 단계다
-- dedup v2는 grouping + representative selection까지 적용 완료
-- symbols 조건은 1차 완화 완료
-- 실출력 기준으로 과한 병합은 없지만, 중복 감소 체감은 아직 약하다
+- dedup v2는 builder에 적용 완료
+- representative selection까지 구현 완료
+- 기사쌍 분석 결과, 주요 원인은 threshold보다 normalize 부족으로 판단했다
+- 특히 숫자 토큰이 합집합을 키워 similarity를 낮추는 문제가 확인되었다
 
 ---
 
 ## 이번 단계에서 해야 할 일
 
-1. 실제 기사쌍 4~6개를 선정한다
-2. 각 기사쌍에 대해 아래를 비교한다
-   - normalize_title 결과
-   - jaccard_similarity 값
-   - threshold 0.6 결과
-   - threshold 0.55 가정 결과
-   - 실제로 묶는 것이 맞는지
-3. 원인을 분류한다
-   - threshold 과도
-   - normalize 부족
-   - 실제로 다른 이슈
-4. 다음 수정 방향을 하나로 정한다
+1. normalize_title에서 숫자 토큰 제거 규칙 추가
+2. similarity 희석에 기여하는 수치형 토큰을 비교 대상에서 제외
+3. 기존 normalize 흐름은 최대한 유지
+
+예상 대상:
+- 순수 숫자 토큰
+- 숫자+영문/단위 형태 중 비교 의미가 낮은 토큰
 
 ---
 
 ## 이번 단계에서 하지 말아야 할 일
 
-- threshold 직접 수정
-- normalize_title 수정
+- threshold 변경
 - builder 수정
-- representative selection 수정
+- symbols 조건 수정
 - event dedup 적용
+- 대표 기사 선택 기준 수정
+- 한영 동의어 사전 추가
 
 ---
 
-## 분석 원칙
+## 수정 원칙
 
-1. 실제 출력 기준으로 본다
-2. 추측보다 similarity 계산 결과를 우선한다
-3. 애매하면 유지한다
-4. 오탐보다 미탐을 허용한다
+1. 최소 수정만 한다
+2. 수치 토큰 제거부터 시작한다
+3. 의미 있는 단어는 제거하지 않는다
+4. threshold는 그대로 유지한다
 
 ---
 
 ## 완료 조건
 
-1. threshold 0.55 후보 검증 완료
-2. normalize 보강 필요성 판단 완료
-3. 다음 수정 방향이 하나로 좁혀진다
-
----
-
-## 참고 문서
-
-- `project-overview.md`
-- `constraints.md`
-- `dedup-v2-design.md`
-- `dedup-v2-validation.md`
-- `dedup-v2-tuning.md`
-- `output-format.md`
-
----
-
-## 작업 판단 기준
-
-좋은 결과:
-- 실제 기사쌍 기반 분석
-- threshold와 normalize 원인을 구분
-- 다음 액션이 명확함
-
-좋지 않은 결과:
-- 추측 위주
-- 여러 수정을 한 번에 제안
-- 오탐 리스크를 가볍게 봄
+1. normalize_title에 숫자 토큰 제거 규칙이 추가된다
+2. 기존 구조는 유지된다
+3. 다음 검증에서 Pair 2, 6류 similarity 개선 가능성이 생긴다

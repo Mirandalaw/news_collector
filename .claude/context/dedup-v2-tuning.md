@@ -132,3 +132,16 @@ threshold 및 normalize 보정 방향을 검토한다.
 1. threshold 0.55 후보의 적절성을 검토한다
 2. normalize 부족 여부를 구분한다
 3. 다음 수정 방향을 하나로 좁힌다
+
+## 분석 결론 요약
+
+기사쌍 분석 결과, dedup v2의 주요 한계는 threshold보다 normalize 부족에 더 가깝다고 판단했다.
+
+### 핵심 발견
+1. threshold 0.55로 해결되는 사례는 제한적이다
+2. 실제 미탐의 주요 원인은 수치 토큰, 한영 혼용, 표현 차이로 인한 normalize 부족이다
+3. threshold를 먼저 낮추는 것보다 normalize를 먼저 보강하는 편이 정확도 개선 폭이 크고 오탐 위험이 낮다
+
+### 다음 수정 방향
+- `normalize_title`에서 수치 토큰 제거를 우선 적용한다
+- threshold는 현재 0.6을 유지한다

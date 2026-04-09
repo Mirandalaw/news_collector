@@ -37,6 +37,10 @@ _RE_SPACES = re.compile(r"\s+")
 # "전망", "오늘의" 등 내용에 영향을 줄 수 있는 단어는 제외
 _NOISE_TOKENS: frozenset[str] = frozenset(["속보", "단독", "종합", "긴급", "특보", "업데이트"])
 
+# 수치 토큰: 순수 숫자 또는 숫자+단위 1글자 (10조, 3q, 2배, 9월, 122 등)
+# "3분기"처럼 단위가 2글자 이상인 경우는 제외하지 않는다
+_RE_NUMERIC_TOKEN = re.compile(r"^\d+[가-힣a-z]?$")
+
 # ---------------------------------------------------------------------------
 # 그룹핑 설정
 # ---------------------------------------------------------------------------
@@ -60,7 +64,8 @@ def normalize_title(title: str) -> str:
       2. 괄호형 편집 태그 제거 ([속보], 【단독】 등)
       3. 특수문자 제거 (알파벳·한글·숫자·공백만 유지)
       4. 노이즈 토큰 제거 (속보, 단독, 종합, 긴급, 특보, 업데이트)
-      5. 공백 정규화
+      5. 수치 토큰 제거 (10조, 3q, 2배, 9월, 122 등 — 합집합 오염 방지)
+      6. 공백 정규화
 
     Args:
         title: 원본 기사 제목
@@ -72,7 +77,7 @@ def normalize_title(title: str) -> str:
     text = _RE_BRACKET_TAG.sub(" ", text)
     text = _RE_SPECIAL.sub(" ", text)
 
-    tokens = [t for t in text.split() if t not in _NOISE_TOKENS]
+    tokens = [t for t in text.split() if t not in _NOISE_TOKENS and not _RE_NUMERIC_TOKEN.match(t)]
     text = " ".join(tokens)
 
     return _RE_SPACES.sub(" ", text).strip()
