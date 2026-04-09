@@ -145,12 +145,13 @@ def group_by_similarity(
 def _symbols_compatible(a: BriefingArticle, b: BriefingArticle) -> bool:
     """두 기사를 같은 그룹으로 묶을 수 있는지 symbols 조건으로 판단한다.
 
-    - 두 기사 모두 symbols가 비어 있으면 호환 (시장 기사끼리)
-    - 두 기사의 symbols가 동일하면 호환
-    - 한쪽만 symbols가 있거나 symbols가 서로 다르면 비호환
+    - 둘 다 empty → 호환 (시장 기사끼리)
+    - 한쪽만 empty → 호환 (태깅 누락 가능성 허용, similarity가 2차 판단)
+    - 둘 다 non-empty이고 동일 → 호환
+    - 둘 다 non-empty이고 다름 → 비호환 (다른 회사)
     """
     set_a = set(a.symbols)
     set_b = set(b.symbols)
-    if not set_a and not set_b:
-        return True
-    return set_a == set_b
+    if set_a and set_b:
+        return set_a == set_b
+    return True
