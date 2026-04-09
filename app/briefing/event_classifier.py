@@ -35,7 +35,6 @@ _RATE_KEYWORDS: tuple[str, ...] = (
 )
 
 _OIL_KEYWORDS: tuple[str, ...] = (
-    "유가",
     "국제유가",
     "wti",
     "브렌트",
@@ -73,14 +72,11 @@ _POLICY_KEYWORDS: tuple[str, ...] = (
 
 _GEOPOLITICS_KEYWORDS: tuple[str, ...] = (
     "지정학",
-    "전쟁",
-    "분쟁",
     "북한",
     "중동",
     "러시아",
     "우크라이나",
     "대만 해협",
-    "이란",
     "이스라엘",
     "하마스",
     "나토",
