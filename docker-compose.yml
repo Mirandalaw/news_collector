@@ -96,7 +96,7 @@ services:
   
   cleanup:
     <<: *app-base
-    command: ["python", "-m", "app.jobs.cleanup_job"]
+    entrypoint: ["python", "-m", "app.jobs.cleanup_job"]
     volumes:
       - ./logs:/app/logs
     profiles: ["jobs"]
