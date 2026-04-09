@@ -100,9 +100,7 @@ def _render_item(idx: int, item: BriefingItem) -> list[str]:
     # 제목 줄: 번호 + 제목 + 종목 태그 + 이벤트 타입 태그
     sym_tag = f"  [{', '.join(item.symbols)}]" if item.symbols else ""
     event_tag = (
-        f"  [{_EVENT_TYPE_LABEL.get(item.event_type, item.event_type)}]"
-        if item.event_type
-        else ""
+        f"  [{_EVENT_TYPE_LABEL.get(item.event_type, item.event_type)}]" if item.event_type else ""
     )
     lines.append(f"{idx:2d}. {item.title}{sym_tag}{event_tag}")
 
