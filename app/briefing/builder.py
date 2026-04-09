@@ -16,7 +16,7 @@ import logging
 from collections import defaultdict
 from datetime import datetime, timezone
 
-from app.briefing.dedup import group_by_similarity
+from app.briefing.dedup import group_by_similarity, pick_representative
 from app.briefing.event_classifier import classify_event_type
 from app.briefing.models import BriefingItem, BriefingSection, MorningBriefing
 from app.db.repositories.briefing_repository import BriefingArticle
@@ -79,12 +79,12 @@ def build_morning_briefing(
     market_section = BriefingSection(
         title="오늘 시장",
         emoji="📈",
-        items=_group_and_build(_dedup_v2(result.market_news), signal_map),
+        items=_group_and_build(_dedup_v2(result.market_news, signal_map), signal_map),
     )
     symbol_section = BriefingSection(
         title="내 종목 뉴스",
         emoji="🔍",
-        items=_group_and_build(_dedup_v2(result.deduplicated_symbol_news), signal_map),
+        items=_group_and_build(_dedup_v2(result.deduplicated_symbol_news, signal_map), signal_map),
     )
     event_section = BriefingSection(
         title="오늘 체크할 이벤트",
@@ -244,16 +244,18 @@ def _to_item_from_group(
     )
 
 
-def _dedup_v2(articles: list[BriefingArticle]) -> list[BriefingArticle]:
+def _dedup_v2(
+    articles: list[BriefingArticle],
+    signal_map: dict[int, list],
+) -> list[BriefingArticle]:
     """dedup v2: 유사 제목 기사를 그룹핑하고 각 그룹의 대표 기사만 반환한다.
 
-    group_by_similarity 결과에서 group[0](입력 순서 기준 첫 번째)을 대표로 사용한다.
-    대표 기사 선택 고도화는 STEP 4에서 처리한다.
+    pick_representative로 signal 보유 → 제목 길이 → published_at 순 대표 선택.
     """
     if not articles:
         return []
     groups = group_by_similarity(articles)
-    result = [group[0] for group in groups]
+    result = [pick_representative(group, signal_map) for group in groups]
     logger.debug("_dedup_v2 | 입력=%d건 → dedup 후=%d건", len(articles), len(result))
     return result
 

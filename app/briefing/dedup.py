@@ -14,8 +14,11 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime, timezone
 
 from app.db.repositories.briefing_repository import BriefingArticle
+
+_MIN_DT = datetime.fromtimestamp(0, tz=timezone.utc)
 
 # ---------------------------------------------------------------------------
 # 정규화 패턴
@@ -140,6 +143,33 @@ def group_by_similarity(
 # ---------------------------------------------------------------------------
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
+
+
+def pick_representative(
+    group: list[BriefingArticle],
+    signal_map: dict[int, list],
+) -> BriefingArticle:
+    """그룹 내 대표 기사 1건을 선택한다.
+
+    우선순위 (앞 조건 동점 시 다음 적용):
+      1. signal 보유 여부 (있는 기사 우선)
+      2. 제목 길이 내림차순 (긴 제목 = 정보량 많음)
+      3. published_at 내림차순 (최신 기사 우선, None은 최하위)
+
+    Args:
+        group: 유사 기사 그룹 (1개 이상)
+        signal_map: {article_id: [Signal, ...]} 맵
+
+    Returns:
+        선택된 대표 BriefingArticle
+    """
+
+    def sort_key(article: BriefingArticle) -> tuple:
+        has_signal = bool(signal_map.get(article.id))
+        pub = article.published_at or _MIN_DT
+        return (not has_signal, -len(article.title), -pub.timestamp())
+
+    return min(group, key=sort_key)
 
 
 def _symbols_compatible(a: BriefingArticle, b: BriefingArticle) -> bool:
