@@ -37,9 +37,21 @@ _RE_SPACES = re.compile(r"\s+")
 # "전망", "오늘의" 등 내용에 영향을 줄 수 있는 단어는 제외
 _NOISE_TOKENS: frozenset[str] = frozenset(["속보", "단독", "종합", "긴급", "특보", "업데이트"])
 
-# 수치 토큰: 순수 숫자 또는 숫자+단위 1글자 (10조, 3q, 2배, 9월, 122 등)
+# 수치 토큰: 순수 숫자 또는 숫자+단위 1글자 (10조, 2배, 9월, 122 등)
 # "3분기"처럼 단위가 2글자 이상인 경우는 제외하지 않는다
+# _NORM_SUBSTITUTIONS에서 먼저 치환된 "분기" 등은 이 필터에 걸리지 않는다
 _RE_NUMERIC_TOKEN = re.compile(r"^\d+[가-힣a-z]?$")
+
+# 동의어 / 표기 정규화 규칙
+# 소문자 + 특수문자 제거 이후, 토큰 필터 이전에 적용한다
+# 순서 의존성: \d+q\b 치환이 numeric 필터보다 먼저 실행되어야 "3q"가 "분기"로 수렴한다
+_NORM_SUBSTITUTIONS: tuple[tuple[re.Pattern, str], ...] = (
+    (re.compile(r"\bfed\b"), "연준"),  # fed → 연준
+    (re.compile(r"\d+q\b"), "분기"),  # 3q, 2q, 1q → 분기 (numeric 필터 전 치환)
+    (re.compile(r"\d+분기"), "분기"),  # 3분기, 2분기 → 분기
+    (re.compile(r"\bearnings\b"), "실적"),  # earnings → 실적
+    (re.compile(r"어닝스?"), "실적"),  # 어닝 / 어닝스 → 실적
+)
 
 # ---------------------------------------------------------------------------
 # 그룹핑 설정
@@ -63,9 +75,10 @@ def normalize_title(title: str) -> str:
       1. 소문자 변환
       2. 괄호형 편집 태그 제거 ([속보], 【단독】 등)
       3. 특수문자 제거 (알파벳·한글·숫자·공백만 유지)
-      4. 노이즈 토큰 제거 (속보, 단독, 종합, 긴급, 특보, 업데이트)
-      5. 수치 토큰 제거 (10조, 3q, 2배, 9월, 122 등 — 합집합 오염 방지)
-      6. 공백 정규화
+      4. 표기 정규화 (fed→연준, Nq→분기, N분기→분기, earnings/어닝→실적)
+      5. 노이즈 토큰 제거 (속보, 단독, 종합, 긴급, 특보, 업데이트)
+      6. 수치 토큰 제거 (10조, 2배, 9월, 122 등 — 합집합 오염 방지)
+      7. 공백 정규화
 
     Args:
         title: 원본 기사 제목
@@ -76,6 +89,9 @@ def normalize_title(title: str) -> str:
     text = title.lower()
     text = _RE_BRACKET_TAG.sub(" ", text)
     text = _RE_SPECIAL.sub(" ", text)
+
+    for pattern, replacement in _NORM_SUBSTITUTIONS:
+        text = pattern.sub(replacement, text)
 
     tokens = [t for t in text.split() if t not in _NOISE_TOKENS and not _RE_NUMERIC_TOKEN.match(t)]
     text = " ".join(tokens)
