@@ -50,6 +50,23 @@ _IMPORTANCE_ORDER: dict[str, int] = {
     Importance.LOW.value: 2,
 }
 
+# 투자 관련 기사 유지 키워드 (signal 없는 기사의 필터 기준)
+# 과도한 확장 금지 — noise-filter.md 유지 대상 기준
+_KEEP_KEYWORDS: tuple[str, ...] = (
+    "금리",
+    "유가",
+    "환율",
+    "지정학",
+    "정책",
+    "실적",
+    "증시",
+    "주가",
+    "코스피",
+    "코스닥",
+    "매출",
+    "영업이익",
+)
+
 
 # ---------------------------------------------------------------------------
 # 공개 함수
@@ -79,12 +96,17 @@ def build_morning_briefing(
     market_section = BriefingSection(
         title="오늘 시장",
         emoji="📈",
-        items=_group_and_build(_dedup_v2(result.market_news, signal_map), signal_map),
+        items=_group_and_build(
+            _dedup_v2(_filter_noise(result.market_news, signal_map), signal_map), signal_map
+        ),
     )
     symbol_section = BriefingSection(
         title="내 종목 뉴스",
         emoji="🔍",
-        items=_group_and_build(_dedup_v2(result.deduplicated_symbol_news, signal_map), signal_map),
+        items=_group_and_build(
+            _dedup_v2(_filter_noise(result.deduplicated_symbol_news, signal_map), signal_map),
+            signal_map,
+        ),
     )
     event_section = BriefingSection(
         title="오늘 체크할 이벤트",
@@ -242,6 +264,31 @@ def _to_item_from_group(
         article_count=len(group),
         sources=sources,
     )
+
+
+def _filter_noise(
+    articles: list[BriefingArticle],
+    signal_map: dict[int, list],
+) -> list[BriefingArticle]:
+    """투자와 무관한 기사를 제거한다.
+
+    signal이 있는 기사는 무조건 유지한다.
+    signal이 없는 기사는 _KEEP_KEYWORDS 포함 여부로 판단한다.
+    """
+    result = []
+    for article in articles:
+        if signal_map.get(article.id):
+            result.append(article)
+            continue
+        text = f"{article.title} {article.summary}".lower()
+        if any(kw in text for kw in _KEEP_KEYWORDS):
+            result.append(article)
+    logger.debug(
+        "_filter_noise | 입력=%d건 → 필터 후=%d건",
+        len(articles),
+        len(result),
+    )
+    return result
 
 
 def _dedup_v2(

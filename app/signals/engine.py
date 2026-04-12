@@ -102,12 +102,31 @@ class SignalEngine:
                 direction_order.get(s.direction.value, 9),
             )
         )
+
+        # 기사당 signal 1개로 제한: importance 높은 것이 정렬 후 앞에 위치하므로 첫 번째만 유지
+        signals = _deduplicate_by_article(signals)
         return signals
 
 
 # ---------------------------------------------------------------------------
 # 내부 헬퍼
 # ---------------------------------------------------------------------------
+
+
+def _deduplicate_by_article(signals: list[Signal]) -> list[Signal]:
+    """기사당 1개의 대표 signal만 유지한다.
+
+    signals는 importance 내림차순으로 정렬된 상태로 입력된다.
+    article_id별로 첫 번째로 등장하는 signal(= 가장 중요한 signal)을 선택한다.
+    동일 importance일 때는 입력 순서가 그대로 유지된다.
+    """
+    seen: set[int] = set()
+    result: list[Signal] = []
+    for signal in signals:
+        if signal.article_id not in seen:
+            seen.add(signal.article_id)
+            result.append(signal)
+    return result
 
 
 def _collect_unique(result: BriefingResult) -> list[BriefingArticle]:
