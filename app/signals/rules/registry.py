@@ -11,7 +11,7 @@ DEFAULT_RULES : 엔진이 기본으로 사용하는 규칙 전체 목록.
   - 또는 DEFAULT_RULES에서 제거
 """
 
-from app.signals.rules import market_rules, symbol_rules
+from app.signals.rules import event_rules, market_rules, symbol_rules
 from app.signals.rules.base import SignalRule
 
 DEFAULT_RULES: list[SignalRule] = [
@@ -42,4 +42,8 @@ DEFAULT_RULES: list[SignalRule] = [
     symbol_rules.CONTRACT_WIN,
     symbol_rules.DIVIDEND_INCREASE,
     symbol_rules.PARTNERSHIP_STRATEGIC,
+    # ── 이벤트 기반 (지정학 / 실적 보완) ──────────────────────────
+    event_rules.GEOPOLITICS_BEARISH,
+    event_rules.EVENT_EARNINGS_BEAT,
+    event_rules.EVENT_EARNINGS_MISS,
 ]
