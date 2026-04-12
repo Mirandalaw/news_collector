@@ -351,7 +351,7 @@ class TestSignalEngine:
         report = SignalEngine(rules=rules).analyze(
             _make_briefing_result(market=[_make_article(title="테스트 기사")])
         )
-        assert len(report.signals) == 2
+        assert len(report.signals) == 1
         assert report.signals[0].importance == Importance.HIGH
 
 

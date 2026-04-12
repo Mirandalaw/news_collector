@@ -312,6 +312,9 @@ def _filter_noise(
         if signal_map.get(article.id):
             result.append(article)
             continue
+        if article.article_type in ("market", "company"):
+            result.append(article)
+            continue
         text = f"{article.title} {article.summary}".lower()
         if any(kw in text for kw in _KEEP_KEYWORDS):
             result.append(article)
