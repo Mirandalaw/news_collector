@@ -16,6 +16,33 @@ from app.db.repositories.briefing_repository import BriefingArticle
 from app.signals.models import Direction, Horizon, Importance, Signal
 
 # ---------------------------------------------------------------------------
+# 문맥 반전 처리
+# ---------------------------------------------------------------------------
+
+# 긍정 키워드가 이 단어와 함께 등장하면 방향을 반전한다
+# 규칙별 negation_keywords가 비어 있으면 이 기본값이 사용된다
+_NEGATION_KEYWORDS: tuple[str, ...] = (
+    "후퇴",
+    "악화",
+    "우려",
+    "불안",
+    "둔화",
+    "충격",
+    "리스크",
+    "실망",
+    "실패",
+    "위축",
+)
+
+# BULLISH ↔ BEARISH 반전, NEUTRAL/MIXED는 그대로 유지
+_DIRECTION_REVERSE: dict[Direction, Direction] = {
+    Direction.BULLISH: Direction.BEARISH,
+    Direction.BEARISH: Direction.BULLISH,
+    Direction.NEUTRAL: Direction.NEUTRAL,
+    Direction.MIXED: Direction.MIXED,
+}
+
+# ---------------------------------------------------------------------------
 # Protocol
 # ---------------------------------------------------------------------------
 
@@ -77,6 +104,7 @@ class KeywordSignalRule:
     reason: str
     action_hint: str
     veto_keywords: tuple[str, ...] = field(default_factory=tuple)
+    negation_keywords: tuple[str, ...] = _NEGATION_KEYWORDS  # 방향 반전 키워드
     target_symbols: tuple[str, ...] = field(default_factory=tuple)
     target_types: tuple[str, ...] = field(default_factory=tuple)
     enabled: bool = True
@@ -111,6 +139,11 @@ class KeywordSignalRule:
         if not any(kw in text for kw in self.trigger_keywords):
             return None
 
+        # 문맥 반전 체크: 부정 키워드가 있으면 방향 반전
+        direction = self.direction
+        if self.negation_keywords and any(neg in text for neg in self.negation_keywords):
+            direction = _DIRECTION_REVERSE[direction]
+
         # 종목 컨텍스트: target_symbols 지정되면 그것만, 아니면 기사의 symbols
         symbols = (
             [s for s in article.symbols if s in self.target_symbols]
@@ -122,7 +155,7 @@ class KeywordSignalRule:
             article_id=article.id,
             article_title=article.title,
             rule_name=self.name,
-            direction=self.direction,
+            direction=direction,
             horizon=self.horizon,
             importance=self.importance,
             reason=self.reason,
