@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from app.signals.models import Signal
+from app.signals.trade_candidate_output import TradeCandidateReport
 
 # ---------------------------------------------------------------------------
 # 기사 단위
@@ -109,6 +110,7 @@ class MorningBriefing:
     market_section: BriefingSection
     symbol_section: BriefingSection
     event_section: BriefingSection
+    trade_candidate_report: TradeCandidateReport | None = None
 
     @property
     def sections(self) -> list[BriefingSection]:

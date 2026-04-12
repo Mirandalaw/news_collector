@@ -17,6 +17,7 @@ from app.signals.models import (
     IMPORTANCE_LABEL,
     Signal,
 )
+from app.signals.trade_candidate_output import TradeCandidateReport
 
 _WIDTH = 62
 _THICK = "═" * _WIDTH
@@ -52,6 +53,10 @@ def render_text(briefing: MorningBriefing) -> str:
 
     for section in briefing.sections:
         lines.extend(_render_section(section))
+        lines.append(_BLANK)
+
+    if briefing.trade_candidate_report is not None:
+        lines.extend(_render_trade_candidates(briefing.trade_candidate_report))
         lines.append(_BLANK)
 
     lines.extend(_render_footer(briefing))
@@ -147,6 +152,23 @@ def _render_signal(signal: Signal) -> list[str]:
         f"    › {signal.reason}",
         f"    › [힌트] {signal.action_hint}",
     ]
+
+
+def _render_trade_candidates(report: TradeCandidateReport) -> list[str]:
+    """매매 후보 섹션을 렌더링한다."""
+    lines: list[str] = [
+        "📊  [ 매매 후보 ]",
+        _THIN,
+    ]
+    if not report.candidates:
+        lines.append("  최종 매매 후보 없음  (가격 데이터 미연결)")
+        return lines
+
+    for c in report.candidates:
+        tag = "▲ 매수" if c.news_decision == "buy_candidate" else "▼ 매도"
+        lines.append(f"  {tag}  {c.symbol}  |  {c.reason}")
+
+    return lines
 
 
 def _render_footer(briefing: MorningBriefing) -> list[str]:

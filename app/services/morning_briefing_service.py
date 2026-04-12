@@ -9,13 +9,18 @@
     → MorningBriefing          : to_text() / to_dict() 제공
 """
 
+import dataclasses
 import logging
 
 from app.briefing.builder import build_morning_briefing
 from app.briefing.models import MorningBriefing
 from app.db.connection import DatabaseConfig
 from app.services.briefing_service import BriefingQuery, BriefingService
+from app.signals.aggregation import aggregate_signals
+from app.signals.decision import make_decision
 from app.signals.engine import SignalEngine
+from app.signals.price_filter_application import apply_price_filters
+from app.signals.trade_candidate_output import build_trade_candidate_report
 from app.summarizers.base import Summarizer
 
 logger = logging.getLogger(__name__)
@@ -54,6 +59,14 @@ class MorningBriefingService:
         result = self._briefing_service.run(query)
         signal_report = SignalEngine().analyze(result)
         briefing = build_morning_briefing(result, signal_report)
+
+        trade_report = build_trade_candidate_report(
+            apply_price_filters(
+                make_decision(aggregate_signals(signal_report.signals)),
+                price_inputs={},  # 가격 데이터 미연결 — 이후 시세 공급 레이어 연결 예정
+            )
+        )
+        briefing = dataclasses.replace(briefing, trade_candidate_report=trade_report)
 
         logger.info(
             "브리핑 생성 완료 | since=%s | market=%d / symbol=%d / event=%d",
