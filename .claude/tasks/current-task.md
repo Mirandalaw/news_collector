@@ -1,26 +1,39 @@
 # CURRENT TASK
 
 ## 목표
-Trade candidate → Simulation 검증 시스템 구축
+Simulation에 사용할 price history provider 구현
 
 ---
 
 ## 해야 할 것
 
-1. simulation.md 기준 구현
-2. 포지션 생성 로직
-3. 손절/익절 적용
-4. PnL 계산
+1. DayBar 리스트 생성
+2. FinanceDataReader로 OHLCV 조회
+3. DataFrame → DayBar 변환
+4. 종목별 dict 형태로 반환
 
 ---
 
-## 금지
+## 입력
 
-- 실제 주문
-- 키움 API 연결
+- symbols: list[str]
+
+---
+
+## 출력
+
+- dict[str, list[DayBar]]
+
+---
+
+## 제약
+
+- 조회 실패 종목 skip
+- 최소 2일 이상 데이터 필요
+- 시뮬레이션 외 로직 포함 금지
 
 ---
 
 ## 성공 기준
 
-- 각 후보가 수익/손실 결과로 변환됨
+- run_simulation에 바로 넣을 수 있는 데이터 생성
