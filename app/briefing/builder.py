@@ -50,7 +50,7 @@ _IMPORTANCE_ORDER: dict[str, int] = {
     Importance.LOW.value: 2,
 }
 
-# 투자 관련 기사 유지 키워드 (signal 없는 기사의 필터 기준)
+# 투자 관련 기사 유지 키워드 (market 섹션 필터 기준)
 # 과도한 확장 금지 — noise-filter.md 유지 대상 기준
 _KEEP_KEYWORDS: tuple[str, ...] = (
     "금리",
@@ -65,6 +65,36 @@ _KEEP_KEYWORDS: tuple[str, ...] = (
     "코스닥",
     "매출",
     "영업이익",
+)
+
+# 기업 관련성 키워드 (symbol 섹션 필터 기준)
+# 재무·사업·제품 컨텍스트가 있어야 기업 기사로 판단
+# 과도한 확장 금지 — symbol-noise-filter.md 유지 조건 기준
+_COMPANY_KEYWORDS: tuple[str, ...] = (
+    "실적",
+    "매출",
+    "영업이익",
+    "순이익",
+    "영업손실",
+    "적자",
+    "흑자",
+    "주가",
+    "상장",
+    "공시",
+    "투자",
+    "계약",
+    "수주",
+    "인수",
+    "합병",
+    "분기",
+    "가이던스",
+    "배당",
+    "반도체",
+    "배터리",
+    "플랫폼",
+    "제품",
+    "서비스",
+    "사업",
 )
 
 
@@ -104,7 +134,9 @@ def build_morning_briefing(
         title="내 종목 뉴스",
         emoji="🔍",
         items=_group_and_build(
-            _dedup_v2(_filter_noise(result.deduplicated_symbol_news, signal_map), signal_map),
+            _dedup_v2(
+                _filter_symbol_noise(result.deduplicated_symbol_news, signal_map), signal_map
+            ),
             signal_map,
         ),
     )
@@ -285,6 +317,35 @@ def _filter_noise(
             result.append(article)
     logger.debug(
         "_filter_noise | 입력=%d건 → 필터 후=%d건",
+        len(articles),
+        len(result),
+    )
+    return result
+
+
+def _filter_symbol_noise(
+    articles: list[BriefingArticle],
+    signal_map: dict[int, list],
+) -> list[BriefingArticle]:
+    """종목 뉴스 섹션에서 기업 관련성 없는 기사를 제거한다.
+
+    signal이 있는 기사는 무조건 유지한다.
+    symbols가 없는 기사는 이 필터 대상이 아니므로 통과한다.
+    symbols가 있는 기사는 _COMPANY_KEYWORDS 포함 여부로 기업 관련성을 판단한다.
+    """
+    result = []
+    for article in articles:
+        if signal_map.get(article.id):
+            result.append(article)
+            continue
+        if not article.symbols:
+            result.append(article)
+            continue
+        text = f"{article.title} {article.summary}".lower()
+        if any(kw in text for kw in _COMPANY_KEYWORDS):
+            result.append(article)
+    logger.debug(
+        "_filter_symbol_noise | 입력=%d건 → 필터 후=%d건",
         len(articles),
         len(result),
     )

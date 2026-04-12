@@ -1,45 +1,41 @@
 # CURRENT TASK
 
 ## 작업명
-signal v2 STEP 2 검증
+symbol 오탐 기사 필터 구현
 
 ## 목표
-event 기반 신규 signal rule이 실제 브리핑 출력에서 자연스럽게 동작하는지 확인한다.
+종목 뉴스 섹션에 포함되는 기사 중 실제 기업과 무관한 기사를 제거한다.
 
 ---
 
 ## 현재 상태
 
-- negation 기반 방향 반전 구현 완료
-- event_rules.py 추가 완료
-- geopolitics / earnings 규칙 registry 등록 완료
+- dedup v2 완료
+- signal v2 완료
+- noise filter 완료
+
+그러나 종목 뉴스에 잘못된 심볼 기사 포함됨
 
 ---
 
 ## 이번 단계에서 해야 할 일
 
-1. 실제 브리핑 출력 확인
-2. geopolitics bearish 발동 여부 확인
-3. earnings beat/miss 발동 여부 확인
-4. 기존 symbol_rules와 중복 노출 여부 확인
-5. 오탐 여부 확인
+1. symbol_section 생성 전에 필터 추가
+2. 기업 관련 키워드 기반 필터링 구현
+3. 오탐 기사 제거
 
 ---
 
 ## 이번 단계에서 하지 말아야 할 일
 
-- importance 전체 개편
-- renderer 수정
-- event classifier 수정
-- 새로운 규칙 추가
+- tagger 수정
+- DB 구조 변경
+- aggressive 필터링
 
 ---
 
 ## 완료 조건
 
-1. 실제 출력에서 신규 signal 동작 확인
-2. 중복/오탐 여부 판단
-3. 다음 단계 방향 결정
-   - 유지
-   - 중복 조정
-   - importance 보정
+1. 사회/생활 기사 제거
+2. 실제 기업 기사 유지
+3. 종목 뉴스 신뢰도 개선
