@@ -116,8 +116,8 @@ def _check_buy(p: PriceFilterInput) -> tuple[bool, str]:
     """
     if p.close_price <= p.ma20:
         return False, f"종가({p.close_price}) <= MA20({p.ma20}): 상승 추세 미확인"
-    if p.volume < p.avg_volume:
-        return False, f"거래량({p.volume}) < 평균({p.avg_volume}): 거래량 미확인"
+    if p.volume < p.avg_volume * 0.7:
+        return False, f"거래량({p.volume}) < 평균×0.7({p.avg_volume * 0.7:.0f}): 거래량 미확인"
     if p.surge_ratio > _MAX_SURGE_RATIO:
         return False, f"surge_ratio({p.surge_ratio:.2%}) > {_MAX_SURGE_RATIO:.0%}: 급등 구간 제외"
     return True, "buy 조건 통과: 종가>MA20, 거래량 확인, 급등 아님"
