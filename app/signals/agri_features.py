@@ -30,8 +30,7 @@ from app.db.repositories.briefing_repository import BriefingArticle
 from app.signals.models import Direction, Signal
 from app.signals.rules import market_rules
 from app.signals.rules.agri_rules import AGRI_RULES, IMPORTANCE_WEIGHT
-from app.sources.agri_watchlist import AGRI_VETO_KEYWORDS, AGRI_WATCHLIST
-from app.taggers.keyword_tagger import KeywordTagger
+from app.sources.agri_watchlist import AGRI_WATCHLIST, AgriTagger
 from app.utils.hashing import normalize_title
 
 ITEMS = [w.symbol for w in AGRI_WATCHLIST]
@@ -96,15 +95,10 @@ def read_snapshots(paths: list[Path]) -> list[RawArticle]:
 
 
 def tag_items(articles: list[RawArticle]) -> list[RawArticle]:
-    """품목 태깅이 비어 있으면 watchlist 로 채우고, 레시피·가공식품 문맥은 품목을 비운다."""
-    tagger = KeywordTagger(AGRI_WATCHLIST)
+    """AgriTagger 로 다시 태깅한다 (스냅샷에 남은 옛 태거 결과와 무관하게 일관된 기준)."""
+    tagger = AgriTagger()
     for a in articles:
-        text = f"{a.title} {a.summary}".lower()
-        if any(v in text for v in AGRI_VETO_KEYWORDS):
-            a.symbols = []
-            continue
-        if not a.symbols:
-            a.symbols = tagger.tag(a.title, a.summary)
+        a.symbols = tagger.tag(a.title, a.summary)
     return articles
 
 

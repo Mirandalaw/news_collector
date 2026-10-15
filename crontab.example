@@ -25,8 +25,8 @@ DB_USER=kdpark
 DB_PASSWORD=
 
 # 텔레그램
-TELEGRAM_BOT_TOKEN=8730089200:AAGQP6c6oKKJKkB7aQKhUg6u4Ns6_F47kr8
-TELEGRAM_CHAT_ID=8719466596
+TELEGRAM_BOT_TOKEN=<BotFather 토큰>
+TELEGRAM_CHAT_ID=<채팅 ID>
 
 # 로그
 LOG_LEVEL=INFO
@@ -56,3 +56,6 @@ BRIEFING_OUTPUT_DIR=$PROJ/output
 
 # 주말 제외 실행 (월~금)
 # 0  6 * * 1-5  $VENV $PROJ/scripts/run_all.py --telegram --no-console
+
+# ── 농산물 가격예측 해커톤: 농업 피드 수집 하루 2회 (Docker) ──
+0 9,16 * * *   cd /home/kdpark/news_collector && docker compose --profile jobs run --rm agri >> logs/agri_cron.log 2>&1

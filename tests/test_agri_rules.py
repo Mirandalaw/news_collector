@@ -61,3 +61,17 @@ def test_reserve_buy_vs_release():
     assert "agri_reserve_buy" in buy and "agri_reserve_release" not in buy
     rel = _fire("비축 배추 하루 200톤 방출", symbols=("배추",))
     assert "agri_reserve_release" in rel and "agri_reserve_buy" not in rel
+
+
+def test_agri_tagger_title_first():
+    from app.sources.agri_watchlist import AgriTagger
+
+    tg = AgriTagger()
+    # 제목에 품목 → 태깅
+    assert tg.tag("배추 ‘청명가을’, 대한민국 최고 품종 대통령상 수상", "") == ["배추"]
+    # 요약 1회 언급만 → 미태깅 (2026-10-15 오탐 사례)
+    assert tg.tag("[탐방] 감홍 사과 되살렸죠", "… 포기하지 않았다. 배추 농사도 잠깐 했다.") == []
+    # 요약 2회 이상 → 태깅
+    assert tg.tag("유통개선에 7779억원 투입", "양파 농가수취율… 양파 가격이…") == ["양파"]
+    # 레시피 문맥 veto
+    assert tg.tag("김치찌개 레시피", "배추 배추 배추") == []

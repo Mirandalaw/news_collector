@@ -71,6 +71,27 @@ services:
       - ./output:/app/output
     profiles: ["jobs"]
 
+  # ── 농산물 가격예측 해커톤 (뉴스 → 피처 CSV) ─────────────────
+  #   docker compose --profile jobs run --rm agri            # 농업 피드 수집 + output/snapshots/<날짜>.jsonl
+  #   docker compose --profile jobs run --rm agri-signals    # 스냅샷 → output/agri_signals.csv (DB 불필요)
+  # cron 예시 (호스트, 하루 2회):
+  #   0 9,16 * * *  cd /home/kdpark/news_collector && docker compose --profile jobs run --rm agri >> logs/agri_cron.log 2>&1
+  agri:
+    <<: *app-base
+    command: ["python", "scripts/run_agri_collect.py", "--dump", "output/snapshots"]
+    volumes:
+      - ./logs:/app/logs
+      - ./output:/app/output
+    profiles: ["jobs"]
+
+  agri-signals:
+    <<: *app-base
+    command: ["python", "scripts/run_agri_signals.py", "--from-snapshots", "output/snapshots", "--out", "output/agri_signals.csv"]
+    depends_on: {}
+    volumes:
+      - ./output:/app/output
+    profiles: ["jobs"]
+
   # ── 유틸리티 ──────────────────────────────────────────────────
   smoke:
     <<: *app-base

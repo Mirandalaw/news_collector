@@ -26,8 +26,7 @@ from app.db.repositories.metrics_repository import try_record_job_run
 from app.jobs.base import JobResult, setup_job_logging
 from app.services.news_ingestion_service import NewsIngestionService
 from app.sources.agri_sources import AGRI_CATEGORY, AGRI_SOURCES
-from app.sources.agri_watchlist import AGRI_WATCHLIST
-from app.taggers.keyword_tagger import KeywordTagger
+from app.sources.agri_watchlist import AgriTagger
 
 _DUMP_SQL = """
 SELECT a.id, a.source_name, a.title, a.url, a.published_at, a.summary, a.collected_at,
@@ -87,7 +86,7 @@ def main() -> int:
         report = NewsIngestionService(
             db_config=db_config,
             sources=AGRI_SOURCES,
-            symbol_tagger=KeywordTagger(AGRI_WATCHLIST),
+            symbol_tagger=AgriTagger(),
             article_classifier=KeywordArticleClassifier(),
         ).run()
         detail = (
