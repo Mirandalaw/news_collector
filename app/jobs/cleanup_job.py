@@ -38,7 +38,8 @@ BATCH_SIZE = 1000
 _COUNT_ARTICLES = """
 SELECT COUNT(*)
 FROM news_articles
-WHERE collected_at < NOW() - (%(days)s || ' days')::INTERVAL;
+WHERE collected_at < NOW() - (%(days)s || ' days')::INTERVAL
+  AND category <> '농업';
 """
 
 _COUNT_METRICS = """
@@ -53,6 +54,7 @@ DELETE FROM news_articles
 WHERE id IN (
     SELECT id FROM news_articles
     WHERE collected_at < NOW() - (%(days)s || ' days')::INTERVAL
+      AND category <> '농업'  -- 농산물 기사는 보존 (해커톤 백테스트·재현 검증 코퍼스)
     LIMIT %(batch_size)s
 );
 """
