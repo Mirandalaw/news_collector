@@ -145,6 +145,19 @@ pgdata     ← Docker named volume (DB 데이터 영구 보존)
 
 ---
 
+## 농산물 가격예측 (해커톤 트랙)
+
+농업 전문지 RSS → 5품목 태깅 → 수급 사건 규칙 → 일자·품목 피처 CSV. 경제 브리핑과 독립 (`category="농업"`).
+
+```bash
+docker compose --profile jobs build collect                    # 이미지 갱신 (코드 바뀐 뒤 1회)
+docker compose --profile jobs run --rm agri                    # 수집 + output/snapshots/<날짜>.jsonl
+docker compose --profile jobs run --rm agri-signals            # 스냅샷 → output/agri_signals.csv (DB 불필요)
+```
+
+`output/agri_signals.csv` 를 price-forecast 저장소의 `data/` 로 복사하면 뉴스 피처로 학습된다.
+스냅샷 jsonl 이 재현 검증용 원본이며, `agri-signals` 는 외부 API·DB 없이 그 파일만 읽는다.
+
 ## cron 스케줄링
 
 `crontab.example` 파일을 참고해서 `crontab -e`로 등록하세요.

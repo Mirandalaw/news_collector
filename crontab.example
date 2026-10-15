@@ -56,3 +56,6 @@ BRIEFING_OUTPUT_DIR=$PROJ/output
 
 # 주말 제외 실행 (월~금)
 # 0  6 * * 1-5  $VENV $PROJ/scripts/run_all.py --telegram --no-console
+
+# ── 농산물 가격예측 해커톤: 농업 피드 수집 하루 2회 (Docker) ──
+0 9,16 * * *   cd /home/kdpark/news_collector && docker compose --profile jobs run --rm agri >> logs/agri_cron.log 2>&1
