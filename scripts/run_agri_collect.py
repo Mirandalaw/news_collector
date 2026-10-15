@@ -44,10 +44,28 @@ def dump_today(db_config: DatabaseConfig, out_dir: Path) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{datetime.now(timezone.utc).date()}.jsonl"
     n = 0
-    with managed_connection(db_config) as conn, conn.cursor() as cur, path.open("w", encoding="utf-8") as f:
+    with (
+        managed_connection(db_config) as conn,
+        conn.cursor() as cur,
+        path.open("w", encoding="utf-8") as f,
+    ):
         cur.execute(_DUMP_SQL, {"cat": AGRI_CATEGORY})
         for row in cur.fetchall():
-            rec = dict(zip(("id", "source_name", "title", "url", "published_at", "summary", "collected_at", "symbols"), row))
+            rec = dict(
+                zip(
+                    (
+                        "id",
+                        "source_name",
+                        "title",
+                        "url",
+                        "published_at",
+                        "summary",
+                        "collected_at",
+                        "symbols",
+                    ),
+                    row,
+                )
+            )
             for k in ("published_at", "collected_at"):
                 rec[k] = rec[k].isoformat() if rec[k] else None
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
@@ -60,7 +78,9 @@ def main() -> int:
     ap.add_argument("--dump", help="오늘 수집분 jsonl 스냅샷 저장 폴더")
     args = ap.parse_args()
 
-    logger = setup_job_logging("agri_collect", os.environ.get("LOG_LEVEL", "INFO"), os.environ.get("LOG_DIR", "logs"))
+    logger = setup_job_logging(
+        "agri_collect", os.environ.get("LOG_LEVEL", "INFO"), os.environ.get("LOG_DIR", "logs")
+    )
     db_config = DatabaseConfig.from_env()
     started = datetime.now(timezone.utc)
     try:
@@ -70,23 +90,42 @@ def main() -> int:
             symbol_tagger=KeywordTagger(AGRI_WATCHLIST),
             article_classifier=KeywordArticleClassifier(),
         ).run()
-        detail = (f"수집={report.total_collected} / 저장={report.total_inserted} / "
-                  f"중복={report.total_skipped} / 품목태깅={report.total_tagged} / "
-                  f"실패소스={len(report.failed_sources)}/{len(AGRI_SOURCES)}")
+        detail = (
+            f"수집={report.total_collected} / 저장={report.total_inserted} / "
+            f"중복={report.total_skipped} / 품목태깅={report.total_tagged} / "
+            f"실패소스={len(report.failed_sources)}/{len(AGRI_SOURCES)}"
+        )
         if args.dump:
             detail += f" / 스냅샷={dump_today(db_config, Path(args.dump))}건"
-        result = JobResult(job_name="agri_collect", success=not report.all_failed,
-                           started_at=started, finished_at=datetime.now(timezone.utc), detail=detail)
+        result = JobResult(
+            job_name="agri_collect",
+            success=not report.all_failed,
+            started_at=started,
+            finished_at=datetime.now(timezone.utc),
+            detail=detail,
+        )
     except Exception as e:  # DB 접속 실패 등
         logger.exception("농산물 수집 실패")
-        result = JobResult(job_name="agri_collect", success=False, started_at=started,
-                           finished_at=datetime.now(timezone.utc), detail="파이프라인 실행 실패", error=e)
+        result = JobResult(
+            job_name="agri_collect",
+            success=False,
+            started_at=started,
+            finished_at=datetime.now(timezone.utc),
+            detail="파이프라인 실행 실패",
+            error=e,
+        )
 
     result.log_summary(logger)
-    try_record_job_run(db_config=db_config, job_name=result.job_name, started_at=result.started_at,
-                       finished_at=result.finished_at, success=result.success,
-                       elapsed_secs=result.elapsed_seconds, detail=result.detail,
-                       error_msg=str(result.error) if result.error else "")
+    try_record_job_run(
+        db_config=db_config,
+        job_name=result.job_name,
+        started_at=result.started_at,
+        finished_at=result.finished_at,
+        success=result.success,
+        elapsed_secs=result.elapsed_seconds,
+        detail=result.detail,
+        error_msg=str(result.error) if result.error else "",
+    )
     return result.exit_code
 
 

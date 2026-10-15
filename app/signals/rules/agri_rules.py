@@ -91,7 +91,15 @@ AGRI_COLD = KeywordSignalRule(
 
 AGRI_DISEASE = KeywordSignalRule(
     name="agri_disease",
-    trigger_keywords=("무름병", "탄저병", "병해충", "뿌리혹병", "노균병", "바이러스병", "병해 확산"),
+    trigger_keywords=(
+        "무름병",
+        "탄저병",
+        "병해충",
+        "뿌리혹병",
+        "노균병",
+        "바이러스병",
+        "병해 확산",
+    ),
     veto_keywords=POSTHOC_VETO,
     negation_keywords=_NO_NEG,
     direction=Direction.BULLISH,
@@ -103,7 +111,15 @@ AGRI_DISEASE = KeywordSignalRule(
 
 AGRI_AREA_DOWN = KeywordSignalRule(
     name="agri_area_down",
-    trigger_keywords=("재배면적 감소", "재배 면적 감소", "면적 줄", "파종 감소", "정식 감소", "생산량 감소", "생산 감소 전망"),
+    trigger_keywords=(
+        "재배면적 감소",
+        "재배 면적 감소",
+        "면적 줄",
+        "파종 감소",
+        "정식 감소",
+        "생산량 감소",
+        "생산 감소 전망",
+    ),
     veto_keywords=POSTHOC_VETO,
     negation_keywords=_NO_NEG,
     direction=Direction.BULLISH,
@@ -115,7 +131,15 @@ AGRI_AREA_DOWN = KeywordSignalRule(
 
 AGRI_SHIPMENT_DELAY = KeywordSignalRule(
     name="agri_shipment_delay",
-    trigger_keywords=("출하 지연", "출하지연", "수확 지연", "출하량 감소", "반입량 감소", "물량 부족", "품귀"),
+    trigger_keywords=(
+        "출하 지연",
+        "출하지연",
+        "수확 지연",
+        "출하량 감소",
+        "반입량 감소",
+        "물량 부족",
+        "품귀",
+    ),
     veto_keywords=POSTHOC_VETO,
     negation_keywords=_NO_NEG,
     direction=Direction.BULLISH,
@@ -131,7 +155,8 @@ AGRI_SHIPMENT_DELAY = KeywordSignalRule(
 
 AGRI_RESERVE_RELEASE = KeywordSignalRule(
     name="agri_reserve_release",
-    # "비축물량 1만톤 방출"처럼 단어 사이에 수량이 끼므로 "방출" 단독으로 잡고, 수매·비축 확대는 별도 규칙(AGRI_RESERVE_BUY)
+    # "비축물량 1만톤 방출"처럼 단어 사이에 수량이 끼므로 "방출" 단독으로 잡는다.
+    # 수매·비축 확대(공급 감소)는 별도 규칙 AGRI_RESERVE_BUY 로 분리.
     trigger_keywords=("방출", "비축 공급", "비축물량 공급", "비축 물량 공급", "정부 공급 확대"),
     veto_keywords=POSTHOC_VETO,
     negation_keywords=_NO_NEG,
@@ -144,7 +169,15 @@ AGRI_RESERVE_RELEASE = KeywordSignalRule(
 
 AGRI_RESERVE_BUY = KeywordSignalRule(
     name="agri_reserve_buy",
-    trigger_keywords=("수매 확대", "비축 확대", "정부 수매", "수매 물량 확대", "시장격리", "시장 격리", "산지 폐기"),
+    trigger_keywords=(
+        "수매 확대",
+        "비축 확대",
+        "정부 수매",
+        "수매 물량 확대",
+        "시장격리",
+        "시장 격리",
+        "산지 폐기",
+    ),
     veto_keywords=POSTHOC_VETO + ("방출",),
     negation_keywords=_NO_NEG,
     direction=Direction.BULLISH,
@@ -156,7 +189,16 @@ AGRI_RESERVE_BUY = KeywordSignalRule(
 
 AGRI_IMPORT_UP = KeywordSignalRule(
     name="agri_import_up",
-    trigger_keywords=("trq", "할당관세", "수입 확대", "수입물량 확대", "수입 증량", "증량", "관세 인하", "수입산 공급"),
+    trigger_keywords=(
+        "trq",
+        "할당관세",
+        "수입 확대",
+        "수입물량 확대",
+        "수입 증량",
+        "증량",
+        "관세 인하",
+        "수입산 공급",
+    ),
     veto_keywords=POSTHOC_VETO,
     negation_keywords=_NO_NEG,
     direction=Direction.BEARISH,
@@ -181,7 +223,15 @@ AGRI_GOOD_CROP = KeywordSignalRule(
 
 AGRI_VOLUME_UP = KeywordSignalRule(
     name="agri_volume_up",
-    trigger_keywords=("출하 본격", "출하 시작", "출하량 증가", "반입량 증가", "물량 증가", "공급 확대", "홍수 출하"),
+    trigger_keywords=(
+        "출하 본격",
+        "출하 시작",
+        "출하량 증가",
+        "반입량 증가",
+        "물량 증가",
+        "공급 확대",
+        "홍수 출하",
+    ),
     veto_keywords=POSTHOC_VETO,
     negation_keywords=_NO_NEG,
     direction=Direction.BEARISH,
@@ -193,7 +243,15 @@ AGRI_VOLUME_UP = KeywordSignalRule(
 
 AGRI_DISCOUNT_SUPPORT = KeywordSignalRule(
     name="agri_discount_support",
-    trigger_keywords=("할인 지원", "할인지원", "농산물 할인", "물가 안정 대책", "수급 안정 대책", "수급안정 대책", "가격 안정 대책"),
+    trigger_keywords=(
+        "할인 지원",
+        "할인지원",
+        "농산물 할인",
+        "물가 안정 대책",
+        "수급 안정 대책",
+        "수급안정 대책",
+        "가격 안정 대책",
+    ),
     veto_keywords=POSTHOC_VETO,
     negation_keywords=_NO_NEG,
     direction=Direction.BEARISH,

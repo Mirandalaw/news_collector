@@ -1,4 +1,5 @@
 """농산물 규칙·watchlist 동작 확인 (DB 불필요)."""
+
 from datetime import datetime, timezone
 
 from app.db.repositories.briefing_repository import BriefingArticle
@@ -10,9 +11,15 @@ from app.taggers.keyword_tagger import KeywordTagger
 
 def _art(title, summary="", symbols=()):
     return BriefingArticle(
-        id=1, title=title, url="https://x", source_name="t", summary=summary,
-        article_type="general", published_at=datetime.now(timezone.utc),
-        collected_at=datetime.now(timezone.utc), symbols=list(symbols),
+        id=1,
+        title=title,
+        url="https://x",
+        source_name="t",
+        summary=summary,
+        article_type="general",
+        published_at=datetime.now(timezone.utc),
+        collected_at=datetime.now(timezone.utc),
+        symbols=list(symbols),
     )
 
 
@@ -34,7 +41,9 @@ def test_reserve_release_is_bearish_short():
 
 
 def test_posthoc_article_is_vetoed():
-    assert "agri_reserve_release" not in _fire("금배추에 비축 방출에도 포기당 2만원 껑충", symbols=("배추",))
+    assert "agri_reserve_release" not in _fire(
+        "금배추에 비축 방출에도 포기당 2만원 껑충", symbols=("배추",)
+    )
 
 
 def test_import_rule_only_for_imported_items():
