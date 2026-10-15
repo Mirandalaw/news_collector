@@ -63,8 +63,8 @@ TELEGRAM_CHAT_ID=<본인_채팅_ID>
 
 # 로그
 LOG_LEVEL=INFO
-LOG_DIR=/home/kdpark/news_collector/logs
-BRIEFING_OUTPUT_DIR=/home/kdpark/news_collector/output
+LOG_DIR=/opt/news-collector/logs
+BRIEFING_OUTPUT_DIR=/opt/news-collector/output
 ```
 
 ---
@@ -142,7 +142,7 @@ crontab -e
 
 `crontab.example` 내용 참고:
 ```cron
-PROJ=/home/kdpark/news_collector
+PROJ=/opt/news-collector
 VENV=$PROJ/.venv/bin/python
 
 # 매일 KST 06:00 수집
@@ -170,7 +170,7 @@ docker compose --profile jobs run --rm collect
 docker compose --profile jobs run --rm briefing
 
 # cron에서 Docker로 실행
-# 0 21 * * *  cd /home/kdpark/news_collector && docker compose --profile jobs run --rm collect
+# 0 21 * * *  cd /opt/news-collector && docker compose --profile jobs run --rm collect
 ```
 
 ---
@@ -183,7 +183,7 @@ mkdir -p ~/news_collector/output
 
 # 로그 로테이션 (선택)
 sudo tee /etc/logrotate.d/news-collector <<'EOF'
-/home/kdpark/news_collector/logs/*.log {
+/opt/news-collector/logs/*.log {
     daily
     rotate 30
     compress

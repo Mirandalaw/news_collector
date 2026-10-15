@@ -239,10 +239,10 @@ python scripts/run_agri_signals.py --from-db --since 2026-01-01 --out output/agr
 10 6 * * *  /path/.venv/bin/python /path/scripts/run_briefing.py --telegram --no-console
 
 # Docker (서버 운영 방식)
-0 21 * * *   cd /home/kdpark/news_collector && docker compose --profile jobs run --rm collect  >> logs/collect_cron.log 2>&1
-10 21 * * *  cd /home/kdpark/news_collector && docker compose --profile jobs run --rm briefing >> logs/briefing_cron.log 2>&1
-0 9,16 * * * cd /home/kdpark/news_collector && docker compose --profile jobs run --rm agri    >> logs/agri_cron.log 2>&1
-0 3 * * 0    cd /home/kdpark/news_collector && docker compose --profile jobs run --rm cleanup --target all >> logs/cleanup_cron.log 2>&1
+0 21 * * *   cd /opt/news-collector && docker compose --profile jobs run --rm collect  >> logs/collect_cron.log 2>&1
+10 21 * * *  cd /opt/news-collector && docker compose --profile jobs run --rm briefing >> logs/briefing_cron.log 2>&1
+0 9,16 * * * cd /opt/news-collector && docker compose --profile jobs run --rm agri    >> logs/agri_cron.log 2>&1
+0 3 * * 0    cd /opt/news-collector && docker compose --profile jobs run --rm cleanup --target all >> logs/cleanup_cron.log 2>&1
 ```
 
 농업 피드는 보도자료·산지 기사가 오전·오후로 나뉘어 올라오므로 하루 2회 수집한다.

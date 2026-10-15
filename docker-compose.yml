@@ -45,8 +45,8 @@ services:
   #   docker compose run --rm all
   #
   # cron 예시 (호스트):
-  #   0 21 * * *   cd /home/kdpark/news_collector && docker compose run --rm collect
-  #  10 21 * * *   cd /home/kdpark/news_collector && docker compose run --rm briefing
+  #   0 21 * * *   cd /opt/news-collector && docker compose run --rm collect
+  #  10 21 * * *   cd /opt/news-collector && docker compose run --rm briefing
 
   collect:
     <<: *app-base
@@ -75,7 +75,7 @@ services:
   #   docker compose --profile jobs run --rm agri            # 농업 피드 수집 + output/snapshots/<날짜>.jsonl
   #   docker compose --profile jobs run --rm agri-signals    # 스냅샷 → output/agri_signals.csv (DB 불필요)
   # cron 예시 (호스트, 하루 2회):
-  #   0 9,16 * * *  cd /home/kdpark/news_collector && docker compose --profile jobs run --rm agri >> logs/agri_cron.log 2>&1
+  #   0 9,16 * * *  cd /opt/news-collector && docker compose --profile jobs run --rm agri >> logs/agri_cron.log 2>&1
   agri:
     <<: *app-base
     command: ["python", "scripts/run_agri_collect.py", "--dump", "output/snapshots"]

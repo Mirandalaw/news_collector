@@ -10,8 +10,8 @@
 #   ./job.sh metrics          # job 실행 메트릭 확인
 #
 # crontab 등록 예시 (crontab -e):
-#   0  21 * * *  /home/kdpark/news_collector/job.sh collect
-#  10  21 * * *  /home/kdpark/news_collector/job.sh briefing
+#   0  21 * * *  /opt/news-collector/job.sh collect
+#  10  21 * * *  /opt/news-collector/job.sh briefing
 # ============================================================
 
 set -euo pipefail
