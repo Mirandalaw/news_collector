@@ -6,8 +6,10 @@
 표준 라이브러리만 쓴다 (폐쇄망 재현 검증에서 pandas 없이도 돌아가야 함).
 
 집계 컬럼 (price-forecast/price_forecast/news.py 와 1:1):
-  date, item, news_cnt, event_cnt, dir_sum, dir_wsum, evt_<rule_name>..., mag_ton, mag_pct,
-  macro_fx_up, macro_oil_up
+  date, item, news_cnt, posthoc_cnt, event_cnt, dir_sum, dir_wsum, evt_<rule_name>...,
+  mag_ton, mag_pct, macro_fx_up, macro_oil_up
+  - posthoc_cnt : 제목에 급등·폭등·금배추 같은 사후 보도 표현이 있는 기사 수
+                  (이미 가격에 반영된 신호)
   - dir_sum  : 사건별 방향(+1 공급 감소 / −1 공급 증가) 합. 클러스터 1개 = 1표
   - dir_wsum : 방향 × importance 가중(HIGH 1.0 / MEDIUM 0.8 / LOW 0.5)
                × 매체 수 가중(1 + 0.25·(n−1), 최대 1.5) × (숫자 없는 사건 0.5)
@@ -29,7 +31,7 @@ from pathlib import Path
 from app.db.repositories.briefing_repository import BriefingArticle
 from app.signals.models import Direction, Signal
 from app.signals.rules import market_rules
-from app.signals.rules.agri_rules import AGRI_RULES, IMPORTANCE_WEIGHT
+from app.signals.rules.agri_rules import AGRI_RULES, IMPORTANCE_WEIGHT, POSTHOC_MARKERS
 from app.sources.agri_watchlist import AGRI_WATCHLIST, AgriTagger
 from app.utils.hashing import normalize_title
 
@@ -140,6 +142,12 @@ def _num(m: re.Match) -> float:
     return head
 
 
+def is_posthoc(title: str) -> bool:
+    """제목에 사후 보도 표현(급등·폭등·금배추…)이 있으면 True. 사건 발동과 무관한 별도 플래그."""
+    t = title.lower()
+    return any(m in t for m in POSTHOC_MARKERS)
+
+
 def extract_magnitude(text: str) -> dict[str, float]:
     """기사 텍스트의 수량. 톤·ha·% 중 있는 것만.
 
@@ -213,6 +221,7 @@ def aggregate_daily(articles: list[RawArticle]) -> list[dict]:
             "date": d.isoformat(),
             "item": item,
             "news_cnt": 0,
+            "posthoc_cnt": 0,
             "event_cnt": 0,
             "dir_sum": 0,
             "dir_wsum": 0.0,
@@ -229,7 +238,10 @@ def aggregate_daily(articles: list[RawArticle]) -> list[dict]:
         if not a.day:
             continue
         for item in a.symbols:
-            rows.setdefault((a.day, item), blank(a.day, item))["news_cnt"] += 1
+            r = rows.setdefault((a.day, item), blank(a.day, item))
+            r["news_cnt"] += 1
+            if is_posthoc(a.title):
+                r["posthoc_cnt"] += 1
 
     # 사건 (클러스터 대표 기준)
     for a, s, n_media in evaluate(articles):
