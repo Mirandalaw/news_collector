@@ -6,13 +6,13 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 User=kdpark
-WorkingDirectory=/home/kdpark/news_collector
+WorkingDirectory=/opt/news-collector
 
 # 환경변수는 .env 파일에서 로드
-EnvironmentFile=/home/kdpark/news_collector/.env
+EnvironmentFile=/opt/news-collector/.env
 
-ExecStart=/home/kdpark/news_collector/.venv/bin/python \
-    /home/kdpark/news_collector/scripts/run_collect.py
+ExecStart=/opt/news-collector/.venv/bin/python \
+    /opt/news-collector/scripts/run_collect.py
 
 # 표준 출력도 journald로 (systemd-journald가 처리)
 StandardOutput=journal

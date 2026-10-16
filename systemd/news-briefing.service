@@ -6,12 +6,12 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 User=kdpark
-WorkingDirectory=/home/kdpark/news_collector
+WorkingDirectory=/opt/news-collector
 
-EnvironmentFile=/home/kdpark/news_collector/.env
+EnvironmentFile=/opt/news-collector/.env
 
-ExecStart=/home/kdpark/news_collector/.venv/bin/python \
-    /home/kdpark/news_collector/scripts/run_briefing.py \
+ExecStart=/opt/news-collector/.venv/bin/python \
+    /opt/news-collector/scripts/run_briefing.py \
     --telegram --no-console
 
 StandardOutput=journal
