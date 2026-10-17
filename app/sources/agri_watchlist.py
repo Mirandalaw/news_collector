@@ -14,12 +14,33 @@ AgriTagger: 기존 KeywordTagger(제목+요약 어디든 1회)는 요약문 한 
 요약에 2회 이상 나올 때만 태깅한다.
 """
 
+import re
+
 from app.sources.watchlist import WatchedSymbol
 
 AGRI_WATCHLIST: list[WatchedSymbol] = [
     WatchedSymbol("배추", ("배추", "김장배추", "가을배추", "고랭지배추", "봄배추")),
     WatchedSymbol(
-        "무", ("가을무", "김장무", "월동무", "무 가격", "무 산지", "무 출하", "무값", "무 도매")
+        "무",
+        (
+            "가을무",
+            "김장무",
+            "월동무",
+            "고랭지무",
+            "무 가격",
+            "무 산지",
+            "무 출하",
+            "무값",
+            "무 도매",
+            "무 재배",
+            "무 생산",
+            "무 반입",
+            "배추·무",
+            "무·배추",
+            "배추와 무",
+            "배추, 무",
+            "배추 무",
+        ),
     ),
     WatchedSymbol("양파", ("양파", "저장양파", "햇양파")),
     WatchedSymbol(
@@ -33,6 +54,11 @@ AGRI_WATCHLIST: list[WatchedSymbol] = [
             "마늘 저장",
             "마늘 재배",
             "마늘 파종",
+            "마늘 재고",
+            "마늘 생산",
+            "마늘 수매",
+            "마늘·",
+            "·마늘",
         ),
     ),
     WatchedSymbol(
@@ -46,6 +72,10 @@ AGRI_WATCHLIST: list[WatchedSymbol] = [
             "고추 가격",
             "고추값",
             "고추 재배",
+            "고추 생산",
+            "고추 수매",
+            "고추 작황",
+            "탄저병",
         ),
     ),
 ]
@@ -58,9 +88,19 @@ AGRI_VETO_KEYWORDS: tuple[str, ...] = (
     "고추장",
     "청양고추",
     "마늘종",
+    "풋고추",
+    "오이고추",
+    "고추냉이",
     "김치찌개",
     "배추전",
     "양파링",
+)
+
+
+# 단독 '무' — 품목 나열 구분자(·,/、 공백 괄호) 사이에 한 글자로 올 때만.
+# "무료"·"무게"·"무름병" 등은 제외
+_MU_RE = re.compile(
+    r"(?:^|[\s·,/、()\[\]\"'“”‘’])무(?=$|[\s·,/、()\[\]\"'“”‘’%값이가는을를도와과의])"
 )
 
 
@@ -83,6 +123,9 @@ class AgriTagger:
         for w in self._watchlist:
             in_title = any(k in t for k in w.keywords)
             hits = sum(s.count(k) for k in w.keywords)
+            if w.symbol == "무":  # 단독 '무'는 정규식으로 보강
+                in_title = in_title or bool(_MU_RE.search(title))
+                hits += len(_MU_RE.findall(summary or ""))
             if in_title or hits >= self._min:
                 out.append(w.symbol)
         return out

@@ -40,15 +40,42 @@ def test_reserve_release_is_bearish_short():
     assert s["agri_reserve_release"].direction == Direction.BEARISH
 
 
-def test_posthoc_article_is_vetoed():
-    assert "agri_reserve_release" not in _fire(
-        "금배추에 비축 방출에도 포기당 2만원 껑충", symbols=("배추",)
-    )
+def test_posthoc_wording_no_longer_vetoes_policy_event():
+    # 2021~2024 코퍼스: 정부 대책 기사 대부분이 제목에 '껑충·금배추'를 함께 쓴다
+    # → 사건은 살리고 사후 보도는 플래그로만
+    from app.signals.agri_features import is_posthoc
+
+    title = "금배추에 비축 방출에도 포기당 2만원 껑충"
+    assert "agri_reserve_release" in _fire(title, symbols=("배추",))
+    assert is_posthoc(title) and not is_posthoc("농식품부, 배추 비축물량 3000톤 공급")
 
 
-def test_import_rule_only_for_imported_items():
+def test_non_event_context_still_vetoed():
+    assert not _fire("김장철 앞두고 원산지 단속…배추 비축 방출 언급", symbols=("배추",))
+    assert not _fire("[칼럼] 배추 비축 방출의 정치경제학", symbols=("배추",))
+
+
+def test_import_rule_covers_cabbage_imports_too():
     assert "agri_import_up" in _fire("깐마늘 TRQ 증량", symbols=("깐마늘",))
-    assert "agri_import_up" not in _fire("배추 TRQ 증량", symbols=("배추",))
+    assert "agri_import_up" in _fire("정부, 중국산 배추 수입 추진", symbols=("배추",))
+
+
+def test_release_rule_catches_supply_expansion_wording():
+    assert "agri_reserve_release" in _fire(
+        "배추·무 가격 폭등에 추석 농산물 4000톤 추가 공급", symbols=("배추", "무")
+    )
+    assert "agri_reserve_release" in _fire("가을배추 2200t 푼다…할인 지원", symbols=("배추",))
+
+
+def test_mu_tagging_in_item_lists():
+    from app.sources.agri_watchlist import AgriTagger
+
+    t = AgriTagger()
+    assert t.tag("배추·무·감자 가격 폭등에 추석 농산물 4000톤 추가 공급", "") == ["배추", "무"]
+    assert t.tag("[물가 비상] 배추 52%·무 42% 껑충", "") == ["배추", "무"]
+    assert "무" not in t.tag("무료 급식 확대…무름병 확산", "")
+    assert t.tag("양파·마늘 할당관세 적용", "") == ["양파", "깐마늘"]
+    assert t.tag("풋고추 가격 급등", "") == []
 
 
 def test_typhoon_is_bullish_no_negation_flip():

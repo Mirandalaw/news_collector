@@ -19,8 +19,21 @@ negation_keywords 는 기본값(우려·둔화 등)이 주식 문맥용이라 �
 from app.signals.models import Direction, Horizon, Importance
 from app.signals.rules.base import KeywordSignalRule
 
-# 사후 보도·사설·레시피 문맥 — 모든 농산물 규칙에서 발동 취소
+# 기사 성격상 수급 사건이 아닌 문맥 — 모든 농산물 규칙에서 발동 취소
+# (사후 보도 표현 "폭등·치솟·금배추"는 더 이상 veto 하지 않는다: 2021~2024 소급 코퍼스에서 정부 대책
+#  기사의 대부분이 제목에 그런 표현을 함께 쓰고 있어 사건을 통째로 놓쳤다. 사후 보도 여부는
+#  agri_features.is_posthoc() 가 별도 플래그로 낸다.)
 POSTHOC_VETO: tuple[str, ...] = (
+    "레시피",
+    "맛집",
+    "사설",
+    "칼럼",
+    "원산지 단속",
+    "원산지 표시",
+)
+
+# 사후 보도 표현 — 규칙 발동은 막지 않고, 사건이 하나도 없을 때 "가격 반영 완료" 플래그로만 쓴다
+POSTHOC_MARKERS: tuple[str, ...] = (
     "금배추",
     "금값",
     "한 포기에",
@@ -29,10 +42,8 @@ POSTHOC_VETO: tuple[str, ...] = (
     "치솟",
     "폭등",
     "폭락",
-    "레시피",
-    "맛집",
-    "사설",
-    "칼럼",
+    "급등",
+    "급락",
 )
 
 _NO_NEG: tuple[str, ...] = ()
@@ -67,7 +78,16 @@ AGRI_HEAVY_RAIN = KeywordSignalRule(
 
 AGRI_HEAT = KeywordSignalRule(
     name="agri_heat",
-    trigger_keywords=("폭염", "고온 피해", "가뭄", "생육 부진", "생육 지연"),
+    trigger_keywords=(
+        "폭염",
+        "고온 피해",
+        "가뭄",
+        "생육 부진",
+        "생육 지연",
+        "늦더위",
+        "고온으로",
+        "작황 부진",
+    ),
     veto_keywords=POSTHOC_VETO,
     negation_keywords=_NO_NEG,
     direction=Direction.BULLISH,
@@ -157,7 +177,21 @@ AGRI_RESERVE_RELEASE = KeywordSignalRule(
     name="agri_reserve_release",
     # "비축물량 1만톤 방출"처럼 단어 사이에 수량이 끼므로 "방출" 단독으로 잡는다.
     # 수매·비축 확대(공급 감소)는 별도 규칙 AGRI_RESERVE_BUY 로 분리.
-    trigger_keywords=("방출", "비축 공급", "비축물량 공급", "비축 물량 공급", "정부 공급 확대"),
+    trigger_keywords=(
+        "방출",
+        "비축 공급",
+        "비축물량",
+        "비축 물량",
+        "비축배추",
+        "비축 배추",
+        "정부 공급 확대",
+        "공급 확대",
+        "추가 공급",
+        "공급량 확대",
+        "푼다",
+        "풀어",
+        "물량 공급",
+    ),
     veto_keywords=POSTHOC_VETO,
     negation_keywords=_NO_NEG,
     direction=Direction.BEARISH,
@@ -198,15 +232,20 @@ AGRI_IMPORT_UP = KeywordSignalRule(
         "증량",
         "관세 인하",
         "수입산 공급",
+        "중국산 배추",
+        "배추 수입",
+        "수입 배추",
+        "신선배추 수입",
+        "수입산 배추",
+        "조기 도입",
     ),
     veto_keywords=POSTHOC_VETO,
     negation_keywords=_NO_NEG,
     direction=Direction.BEARISH,
     horizon=Horizon.LONG,
     importance=Importance.HIGH,
-    reason="TRQ·할당관세 → 수입품 공급 증가, 중기 하락 요인",
-    action_hint="양파·깐마늘·건고추에만 적용",
-    target_symbols=("양파", "깐마늘", "건고추"),
+    reason="TRQ·할당관세·수입 → 공급 증가, 하락 요인 (2024년처럼 배추 수입도 발생)",
+    action_hint="양파·깐마늘·건고추는 중기, 배추 수입은 단기 물량",
 )
 
 AGRI_GOOD_CROP = KeywordSignalRule(
