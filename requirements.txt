@@ -1,2 +1,5 @@
 feedparser==6.0.12
 psycopg2-binary==2.9.11
+# 브리핑의 시세 조회(app/signals/price_data_provider.py, price_history_provider.py)
+finance-datareader==0.9.202
+pandas==3.0.6
