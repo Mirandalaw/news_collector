@@ -4,6 +4,7 @@
 Docker 이미지에서 run_briefing / run_all 이 ModuleNotFoundError 로 매번 실패했다.
 진입점이 쓰는 모듈을 전부 import 해 보면 같은 누락을 CI 에서 잡는다.
 """
+
 import importlib
 
 import pytest
